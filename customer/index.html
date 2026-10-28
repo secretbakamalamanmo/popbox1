@@ -1,0 +1,1887 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="theme-color" content="#342319">
+    <title>POP BOX — Digital Menu</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Poppins:wght@500;600;700&display=swap" rel="stylesheet">
+
+    <style>
+      .qr-welcome-screen{position:fixed;inset:0;z-index:2000;display:flex;align-items:center;justify-content:center;padding:24px;background:radial-gradient(circle at top right,#65432f 0,#241b18 42%,#151313 100%);overflow:auto}
+      .qr-welcome-card{width:min(100%,540px);background:#fffdfa;color:#211a18;border-radius:26px;padding:clamp(24px,5vw,42px);box-shadow:0 24px 90px #0007;text-align:center}
+      .qr-welcome-logo{width:82px;height:82px;object-fit:contain;border-radius:14px;margin:0 auto 20px;display:block}
+      .qr-welcome-card h1{font-size:clamp(28px,5vw,40px);line-height:1.12;margin:12px 0}
+      .qr-welcome-card>p{color:#786e69;line-height:1.6;margin:0 0 24px}
+      .qr-welcome-option{width:100%;display:flex;align-items:center;gap:14px;text-align:left;padding:17px;margin:10px 0;border:1px solid #e9dfd8;border-radius:16px;background:#fff;color:#211a18;cursor:pointer;transition:transform .15s,border-color .15s}
+      .qr-welcome-option:hover{transform:translateY(-2px);border-color:#9d7663}
+      .qr-welcome-option>span{font-size:28px}.qr-welcome-option div{display:flex;flex:1;flex-direction:column;gap:5px}.qr-welcome-option strong{font-size:15px}.qr-welcome-option small{font-size:12px;color:#82756f;line-height:1.45}.qr-welcome-option>b{font-size:25px;color:#9d7663}.qr-welcome-note{display:block;color:#82756f;margin-top:18px;font-size:11px}
+      @media(max-width:480px){.qr-welcome-screen{padding:14px}.qr-welcome-card{border-radius:20px}.qr-welcome-option{padding:14px}}
+    
+      .menu-photo-note{margin:0 0 12px;color:#8a7b73;font-size:11px;line-height:1.45}
+</style>
+
+</head>
+<body>
+
+    <!-- FIRST SCREEN AFTER QR SCAN -->
+    <section id="qr-welcome-screen" class="qr-welcome-screen" aria-label="Welcome to Pop Box Cafe">
+      <div class="qr-welcome-card">
+        <img src="pop-box-logo.jpg" alt="POP BOX Cafe logo" class="qr-welcome-logo">
+        <span class="eyebrow">WELCOME TO POP BOX CAFE</span>
+        <h1>How would you like to order today?</h1>
+        <p>Let us help you choose something that matches your mood, or explore the menu yourself.</p>
+        <button class="qr-welcome-option" onclick="startMenuGuideFromWelcome()"><span>✨</span><div><strong>Get menu suggestions</strong><small>Share a few preferences to get food or drink suggestions.</small></div><b>›</b></button>
+        <button class="qr-welcome-option" onclick="browseFromWelcome()"><span>☕</span><div><strong>Browse Menu</strong><small>See available items and choose your own order.</small></div><b>›</b></button>
+        <small class="qr-welcome-note">Suggestions are optional; you choose what to order.</small>
+      </div>
+    </section>
+
+    <header class="desktop-header">
+        <div class="nav-brand">
+            <div class="logo-box"><img src="pop-box-logo.jpg" alt="POP BOX logo"></div>
+            <div>
+                <span>POP BOX</span>
+                <small>dine + art space</small>
+            </div>
+        </div>
+        <div class="nav-right">
+            <span class="table-badge"><i class="fa-solid fa-location-dot"></i> Table 1</span>
+            <button class="cart-icon-btn" onclick="openCart()" aria-label="Open cart">
+                <i class="fa-solid fa-bag-shopping"></i>
+                <span id="cart-badge" class="badge">0</span>
+            </button>
+        </div>
+    </header>
+
+    <main class="main-container">
+        <section class="welcome-hero">
+            <div class="hero-copy">
+                <span class="eyebrow"><i class="fa-solid fa-sparkles"></i> POP BOX DIGITAL MENU</span>
+                <h1>What are you craving <em>today?</em></h1>
+                <p>Browse the menu or get suggestions based on flavor, food type, and budget.</p>
+                <button class="hero-guide-btn" onclick="openMenuGuide()">
+                    <i class="fa-solid fa-compass"></i> Get menu suggestions
+                </button>
+            </div>
+            <div class="hero-art" aria-hidden="true">
+                <div class="hero-glow"></div>
+                <div class="coffee-cup"><i class="fa-solid fa-mug-hot"></i></div>
+                <span class="floating-chip chip-one">Cafe pick</span>
+                <span class="floating-chip chip-two">Fresh today</span>
+            </div>
+        </section>
+
+        <section class="search-section" aria-label="Menu search">
+            <div class="search-bar">
+                <i class="fa-solid fa-magnifying-glass"></i>
+                <input type="text" id="menu-search" placeholder="Search drinks, milk tea, coffee..." oninput="filterSearch()">
+                <button class="clear-search" id="clear-search" onclick="clearSearch()" aria-label="Clear search"><i class="fa-solid fa-xmark"></i></button>
+            </div>
+            <button class="guide-trigger-btn" onclick="openMenuGuide()">
+                <i class="fa-solid fa-compass"></i><span>Menu Guide</span>
+            </button>
+        </section>
+
+        <div class="category-row" id="category-row">
+            <button class="category-chip active" data-category="All" onclick="setCategory('All', this)">All</button>
+            <button class="category-chip" data-category="Espresso Based" onclick="setCategory('Espresso Based', this)">☕ Espresso</button>
+            <button class="category-chip" data-category="Non-Coffee" onclick="setCategory('Non-Coffee', this)">🥤 Non-Coffee</button>
+            <button class="category-chip" data-category="Milk Tea" onclick="setCategory('Milk Tea', this)">🧋 Milk Tea</button>
+            <button class="category-chip" data-category="Fruit Soda" onclick="setCategory('Fruit Soda', this)">🍓 Fruit Soda</button>
+            <button class="category-chip" data-category="Silog Meals" onclick="setCategory('Silog Meals', this)">🍳 Silog Meals</button>
+            <button class="category-chip" data-category="Sizzlings" onclick="setCategory('Sizzlings', this)">🍽️ Sizzlings</button>
+            <button class="category-chip" data-category="Wings" onclick="setCategory('Wings', this)">🍗 Wings</button>
+            <button class="category-chip" data-category="Snacks" onclick="setCategory('Snacks', this)">🍟 Snacks</button>
+            <button class="category-chip" data-category="Platter" onclick="setCategory('Platter', this)">🍱 Platter</button>
+            <button class="category-chip" data-category="Extras" onclick="setCategory('Extras', this)">➕ Extras</button>
+        </div>
+
+        <section class="menu-section top-section">
+            <div class="section-heading">
+                <div><span class="section-kicker">FEATURED DRINKS</span><h2>Top picks</h2></div>
+                <span class="section-note"><i class="fa-solid fa-fire"></i> A few to get started</span>
+            </div>
+            <div class="top-picks-grid" id="top-picks-container"></div>
+        </section>
+
+        <section class="menu-section">
+            <div class="section-heading">
+                <div><span class="section-kicker">EXPLORE THE MENU</span><h2>Every craving, covered</h2></div>
+                <span class="result-count" id="result-count"></span>
+            </div>
+            <p class="menu-photo-note">Menu photos are visual references; actual servings and presentation may vary.</p>
+            <div class="horizontal-scroll-grid" id="menu-grid"></div>
+            <div id="no-results" class="no-results hidden">
+                <div class="no-results-icon"><i class="fa-solid fa-magnifying-glass"></i></div>
+                <h3>No menu items found</h3>
+                <p>Try another search, or use the Menu Guide to find a match.</p>
+                <button class="outline-btn" onclick="clearSearch(); openMenuGuide()">Use Menu Guide</button>
+            </div>
+        </section>
+
+        <section class="guide-banner">
+            <div class="guide-banner-icon"><i class="fa-solid fa-compass"></i></div>
+            <div><span>NOT SURE WHAT TO ORDER?</span><h3>Tell us what you're feeling.</h3><p>Share a flavor, food type, or budget to find matching menu items.</p></div>
+            <button onclick="openMenuGuide()">Find a match <i class="fa-solid fa-arrow-right"></i></button>
+        </section>
+    </main>
+
+    <!-- CART -->
+    <div id="cart-modal" class="modal-overlay" role="dialog" aria-modal="true" aria-label="Your order">
+        <div class="cart-drawer">
+            <div class="drawer-header">
+                <div><span class="drawer-kicker">TABLE 1</span><h3>Your order</h3></div>
+                <button class="close-btn" onclick="closeCart()"><i class="fa-solid fa-xmark"></i></button>
+            </div>
+            <div class="drawer-items" id="drawer-items-list"></div>
+            <div class="drawer-footer">
+                <div class="drawer-total"><span>Total</span><strong id="drawer-total-price">₱0.00</strong></div>
+                <button class="primary-btn" onclick="proceedToCheckout()">Confirm order <i class="fa-solid fa-arrow-right"></i></button>
+                <small class="secure-note"><i class="fa-solid fa-circle-check"></i> Order will appear on the staff dashboard in this browser.</small>
+            </div>
+        </div>
+    </div>
+
+    <!-- ORDER RECEIPT -->
+    <div id="receipt-modal" class="modal-overlay" role="dialog" aria-modal="true" aria-label="Order receipt">
+        <div class="receipt-card">
+            <button class="close-btn receipt-close" onclick="closeReceipt()" aria-label="Close receipt"><i class="fa-solid fa-xmark"></i></button>
+            <div class="receipt-heading"><i class="fa-solid fa-receipt"></i><h3>POP BOX CAFE</h3><p>ORDER SUMMARY</p></div>
+            <div id="receipt-order-meta" class="receipt-meta"></div>
+            <div id="receipt-items" class="receipt-items"></div>
+            <div class="receipt-total"><span>Total amount</span><strong id="receipt-total">₱0.00</strong></div>
+            <p class="receipt-status" id="receipt-status">Payment status: Pending</p>
+            <p class="receipt-note">Please show your order number to the cashier. This is an order summary, not an official proof of payment.</p>
+            <button class="primary-btn receipt-done" onclick="closeReceipt()">Done</button>
+        </div>
+    </div>
+
+    <!-- MENU GUIDE -->
+    <div id="guide-modal" class="modal-overlay" role="dialog" aria-modal="true" aria-label="Menu guide">
+        <div class="guide-card">
+            <div class="drawer-header">
+                <div><span class="drawer-kicker guide-kicker">MENU GUIDE</span><h3>What are you in the mood for?</h3></div>
+                <button class="close-btn" onclick="closeMenuGuide()"><i class="fa-solid fa-xmark"></i></button>
+            </div>
+            <p class="guide-intro">Would you like help choosing, or would you rather browse the menu yourself?</p>
+
+            <div id="guide-choice-screen" class="guide-choice-screen">
+                <button class="guide-choice-card" onclick="chooseMenuGuidePath('recommend')"><span class="guide-choice-icon">✨</span><strong>Get menu suggestions</strong><small>Share a few preferences to get food or drink suggestions.</small></button>
+                <button class="guide-choice-card" onclick="chooseMenuGuidePath('browse')"><span class="guide-choice-icon">☕</span><strong>Browse Menu</strong><small>Choose items directly from the menu.</small></button>
+            </div>
+            <div id="guide-recommend-screen" class="hidden">
+            <p class="guide-intro">Describe a flavor, food type, or budget, or tap a preference. Suggestions are ranked from available menu items; you choose what to add.</p>
+            <div class="guide-tabs">
+                <button class="guide-tab active" onclick="switchRecommendationInput('text', this)"><i class="fa-regular fa-message"></i> Text</button>
+                <button class="guide-tab" onclick="switchRecommendationInput('voice', this)"><i class="fa-solid fa-microphone"></i> Voice</button>
+                <button class="guide-tab" onclick="switchRecommendationInput('image', this)"><i class="fa-regular fa-image"></i> Image</button>
+            </div>
+
+            <div class="guide-panel" id="guide-text-panel">
+                <textarea id="guide-mood-desc" placeholder="e.g. I want something refreshing but not too sweet..."></textarea>
+                <div class="mood-chips">
+                    <button onclick="setMenuPreference('I want something sweet and fruity')">🫐 Sweet / fruity</button>
+                    <button onclick="setMenuPreference('I want coffee and something to help me wake up')">☕ Coffee</button>
+                    <button onclick="setMenuPreference('I want something creamy but not too sweet')">🥛 Creamy, less sweet</button>
+                    <button onclick="setMenuPreference('I want something refreshing and cold')">🧊 Refreshing</button>
+                    <button onclick="setMenuPreference('I want food or a snack')">🍴 Food / snack</button>
+                    <button onclick="setMenuPreference('Recommend items under ₱150')">₱ Under 150</button>
+                </div>
+            </div>
+
+            <div class="guide-panel hidden" id="guide-voice-panel">
+                <div class="voice-box">
+                    <button class="voice-button" id="voice-button" onclick="startVoiceInput()"><i class="fa-solid fa-microphone"></i></button>
+                    <strong id="voice-status">Tap to speak</strong>
+                    <span>Example: “I want something light and refreshing.”</span>
+                </div>
+            </div>
+
+            <div class="guide-panel hidden" id="guide-image-panel">
+                <label class="image-upload" for="guide-image-input">
+                    <input type="file" id="guide-image-input" accept="image/*" onchange="previewReferencePhoto(event)">
+                    <i class="fa-regular fa-image"></i><strong>Upload a photo</strong><span>Photo is shown as a reference only. Add a text description to get relevant suggestions.</span>
+                </label>
+                <div id="image-preview" class="image-preview hidden"></div>
+            </div>
+
+            <button class="primary-btn guide-analyze-btn" onclick="renderMenuRecommendations()"><i class="fa-solid fa-compass"></i> Show menu suggestions</button>
+            <div id="guide-suggestion-result" class="guide-suggestion-box hidden"></div>
+            <button class="outline-btn guide-back-btn" onclick="backToMenuGuideChoice()">← Back to options</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="toast" class="toast"><i class="fa-solid fa-circle-check"></i><span>Added to order</span></div>
+
+    <style>
+        .guide-choice-screen { display:grid; grid-template-columns:1fr 1fr; gap:12px; margin:18px 0; }
+        .guide-choice-card { display:flex; flex-direction:column; align-items:flex-start; gap:9px; padding:18px; border:1px solid #e8ddd7; border-radius:16px; background:#fffaf7; color:#29201c; text-align:left; cursor:pointer; min-height:155px; }
+        .guide-choice-card:hover { border-color:#b9875e; transform:translateY(-1px); }
+        .guide-choice-icon { font-size:27px; }
+        .guide-choice-card strong { font-size:15px; }
+        .guide-choice-card small { color:#786d67; line-height:1.45; }
+        .mood-selection { margin:10px 0 16px; }
+        .guide-back-btn { margin-top:12px; }
+        @media(max-width:520px) { .guide-choice-screen { grid-template-columns:1fr; } .guide-choice-card { min-height:unset; } }
+        .is-sold-out .pick-image img, .is-sold-out .card-image-wrap img { filter: grayscale(1); opacity: .55; }
+        .is-sold-out .pick-add:disabled, .add-cart-btn:disabled { cursor: not-allowed; opacity: .45; }
+        .pick-add:disabled { background: #777 !important; }
+    
+        .receipt-card { position:relative; width:min(430px, calc(100vw - 28px)); max-height:88vh; overflow:auto; background:#fff; border-radius:18px; padding:28px; box-shadow:0 20px 70px #0003; color:#211c1d; }
+        .receipt-close { position:absolute; right:14px; top:14px; }
+        .receipt-heading { text-align:center; padding:8px 0 18px; border-bottom:1px dashed #d9d0cc; }
+        .receipt-heading>i { font-size:25px; color:#6b4545; margin-bottom:8px; }
+        .receipt-heading h3 { font-size:20px; letter-spacing:1px; }
+        .receipt-heading p { font-size:10px; letter-spacing:2px; color:#857a78; margin-top:5px; }
+        .receipt-meta { display:grid; gap:6px; padding:15px 0; font-size:12px; color:#635b5b; border-bottom:1px dashed #d9d0cc; }
+        .receipt-meta b { display:inline-block; min-width:72px; color:#30292a; }
+        .receipt-items { display:grid; gap:13px; padding:17px 0; }
+        .receipt-line { display:flex; justify-content:space-between; gap:12px; font-size:12px; }
+        .receipt-line small { display:block; margin-top:4px; color:#827777; }
+        .receipt-line>b { white-space:nowrap; }
+        .receipt-total { border-top:1px dashed #d9d0cc; padding-top:16px; display:flex; align-items:center; justify-content:space-between; gap:12px; font-weight:700; }
+        .receipt-total strong { font-size:22px; color:#6b4545; }
+        .receipt-status { font-size:11px; font-weight:700; margin-top:14px; color:#a35b31; }
+        .receipt-note { font-size:10px; line-height:1.5; color:#827777; margin-top:10px; }
+        .receipt-done { width:100%; justify-content:center; margin-top:18px; }
+
+    </style>
+    <script>
+        const menuData = [
+            {
+                        "id": 1,
+                        "name": "Okinawa",
+                        "category": "Milk Tea",
+                        "size": "22 oz — ₱49 (16 oz unavailable)",
+                        "price": 49,
+                        "image": "https://framerusercontent.com/images/L0DKPuhjiQG0EBdp6Gm0hUexc.jpg",
+                        "tag": "Milk Tea",
+                        "description": "22 oz only — ₱49. 16 oz unavailable."
+            },
+            {
+                        "id": 2,
+                        "name": "Brown Sugar",
+                        "category": "Milk Tea",
+                        "size": "22 oz — ₱49 (16 oz unavailable)",
+                        "price": 49,
+                        "image": "https://abdistribution.ca/cdn/shop/products/MilTea002resized_700x700.jpg?v=1660334628",
+                        "tag": "Milk Tea",
+                        "description": "22 oz only — ₱49. 16 oz unavailable."
+            },
+            {
+                        "id": 3,
+                        "name": "Matcha",
+                        "category": "Milk Tea",
+                        "size": "22 oz — ₱49 (16 oz unavailable)",
+                        "price": 49,
+                        "image": "https://images.deliveryhero.io/image/fd-ph/LH/rjru-listing.jpg",
+                        "tag": "Milk Tea",
+                        "description": "22 oz only — ₱49. 16 oz unavailable."
+            },
+            {
+                        "id": 4,
+                        "name": "Chocolate",
+                        "category": "Milk Tea",
+                        "size": "22 oz — ₱49 (16 oz unavailable)",
+                        "price": 49,
+                        "image": "https://www.nudon.co.uk/site/assets/images/uploads/765_3200_df84abe3df8a_o.png",
+                        "tag": "Milk Tea",
+                        "description": "22 oz only — ₱49. 16 oz unavailable."
+            },
+            {
+                        "id": 5,
+                        "name": "Taro",
+                        "category": "Milk Tea",
+                        "size": "22 oz — ₱49 (16 oz unavailable)",
+                        "price": 49,
+                        "image": "https://shop.possmei.com/cdn/shop/files/be1a3afb44f3fb78a80b1a46034666c0.png?v=1747043675&width=480",
+                        "tag": "Milk Tea",
+                        "description": "22 oz only — ₱49. 16 oz unavailable."
+            },
+            {
+                        "id": 6,
+                        "name": "Cookies and Cream",
+                        "category": "Milk Tea",
+                        "size": "22 oz — ₱49 (16 oz unavailable)",
+                        "price": 49,
+                        "image": "https://images.deliveryhero.io/image/fd-ph/products/10539198.jpg?width=720",
+                        "tag": "Milk Tea",
+                        "description": "22 oz only — ₱49. 16 oz unavailable."
+            },
+            {
+                        "id": 7,
+                        "name": "Red Velvet",
+                        "category": "Milk Tea",
+                        "size": "22 oz — ₱49 (16 oz unavailable)",
+                        "price": 49,
+                        "image": "https://myjoybubble.com/wp-content/uploads/2021/11/red-velvet-cheesecake-milk-tea-L.png",
+                        "tag": "Milk Tea",
+                        "description": "22 oz only — ₱49. 16 oz unavailable."
+            },
+            {
+                        "id": 8,
+                        "name": "Lychee",
+                        "category": "Fruit Soda",
+                        "size": "22 oz — ₱49 (16 oz unavailable)",
+                        "price": 49,
+                        "image": "https://i.pinimg.com/originals/cf/09/3a/cf093a1643884dc7923e28275dd7c40c.png",
+                        "tag": "Fruit Soda",
+                        "description": "22 oz only — ₱49. 16 oz unavailable."
+            },
+            {
+                        "id": 9,
+                        "name": "Strawberry",
+                        "category": "Fruit Soda",
+                        "size": "22 oz — ₱49 (16 oz unavailable)",
+                        "price": 49,
+                        "image": "https://snapcalorie-webflow-website.s3.us-east-2.amazonaws.com/media/food_pics_v2/medium/blueberry_italian_soda.jpg",
+                        "tag": "Fruit Soda",
+                        "description": "22 oz only — ₱49. 16 oz unavailable."
+            },
+            {
+                        "id": 10,
+                        "name": "Blueberry",
+                        "category": "Fruit Soda",
+                        "size": "22 oz — ₱49 (16 oz unavailable)",
+                        "price": 49,
+                        "image": "https://snapcalorie-webflow-website.s3.us-east-2.amazonaws.com/media/food_pics_v2/medium/blueberry_italian_soda.jpg",
+                        "tag": "Fruit Soda",
+                        "description": "22 oz only — ₱49. 16 oz unavailable."
+            },
+            {
+                        "id": 11,
+                        "name": "Green Apple",
+                        "category": "Fruit Soda",
+                        "size": "22 oz — ₱49 (16 oz unavailable)",
+                        "price": 49,
+                        "image": "https://i.pinimg.com/originals/cf/09/3a/cf093a1643884dc7923e28275dd7c40c.png",
+                        "tag": "Fruit Soda",
+                        "description": "22 oz only — ₱49. 16 oz unavailable."
+            },
+            {
+                        "id": 12,
+                        "name": "Mango",
+                        "category": "Fruit Soda",
+                        "size": "22 oz — ₱49 (16 oz unavailable)",
+                        "price": 49,
+                        "image": "https://prcdn.freetls.fastly.net/release_image/23968/292/23968-292-30e299b61019662681c06fb5deda564d-1920x1400.jpg?auto=webp&bg-color=fff&fit=bounds&format=jpeg&height=1350&quality=85%2C65&width=1950",
+                        "tag": "Fruit Soda",
+                        "description": "22 oz only — ₱49. 16 oz unavailable."
+            },
+            {
+                        "id": 13,
+                        "name": "Grapes",
+                        "category": "Fruit Soda",
+                        "size": "22 oz — ₱49 (16 oz unavailable)",
+                        "price": 49,
+                        "image": "https://snapcalorie-webflow-website.s3.us-east-2.amazonaws.com/media/food_pics_v2/medium/blueberry_italian_soda.jpg",
+                        "tag": "Fruit Soda",
+                        "description": "22 oz only — ₱49. 16 oz unavailable."
+            },
+            {
+                        "id": 14,
+                        "name": "Honey Peach",
+                        "category": "Fruit Soda",
+                        "size": "22 oz — ₱49 (16 oz unavailable)",
+                        "price": 49,
+                        "image": "https://i.pinimg.com/originals/cf/09/3a/cf093a1643884dc7923e28275dd7c40c.png",
+                        "tag": "Fruit Soda",
+                        "description": "22 oz only — ₱49. 16 oz unavailable."
+            },
+            {
+                        "id": 15,
+                        "name": "Lemon",
+                        "category": "Fruit Soda",
+                        "size": "22 oz — ₱49 (16 oz unavailable)",
+                        "price": 49,
+                        "image": "https://i.pinimg.com/originals/cf/09/3a/cf093a1643884dc7923e28275dd7c40c.png",
+                        "tag": "Fruit Soda",
+                        "description": "22 oz only — ₱49. 16 oz unavailable."
+            },
+            {
+                        "id": 16,
+                        "name": "Passion Fruit",
+                        "category": "Fruit Soda",
+                        "size": "22 oz — ₱49 (16 oz unavailable)",
+                        "price": 49,
+                        "image": "https://framerusercontent.com/images/L0DKPuhjiQG0EBdp6Gm0hUexc.jpg",
+                        "tag": "Fruit Soda",
+                        "description": "22 oz only — ₱49. 16 oz unavailable."
+            },
+            {
+                        "id": 17,
+                        "name": "Kiwi",
+                        "category": "Fruit Soda",
+                        "size": "22 oz — ₱49 (16 oz unavailable)",
+                        "price": 49,
+                        "image": "https://prcdn.freetls.fastly.net/release_image/23968/292/23968-292-30e299b61019662681c06fb5deda564d-1920x1400.jpg?auto=webp&bg-color=fff&fit=bounds&format=jpeg&height=1350&quality=85%2C65&width=1950",
+                        "tag": "Fruit Soda",
+                        "description": "22 oz only — ₱49. 16 oz unavailable."
+            },
+            {
+                        "id": 18,
+                        "name": "Americano",
+                        "category": "Espresso Based",
+                        "size": "Hot Tall ₱99 · Iced Grande ₱109 · Iced Venti ₱125",
+                        "price": 99,
+                        "image": "https://images.unsplash.com/photo-1495474472287-4d71bcdd2085?auto=format&fit=crop&w=700&q=85",
+                        "tag": "Espresso Based",
+                        "description": "Americano from the Pop Box Cafe menu."
+            },
+            {
+                        "id": 19,
+                        "name": "Cafe Latte",
+                        "category": "Espresso Based",
+                        "size": "Hot Tall ₱110 · Iced Grande ₱119 · Iced Venti ₱130",
+                        "price": 110,
+                        "image": "https://images.unsplash.com/photo-1495474472287-4d71bcdd2085?auto=format&fit=crop&w=700&q=85",
+                        "tag": "Espresso Based",
+                        "description": "Cafe Latte from the Pop Box Cafe menu."
+            },
+            {
+                        "id": 20,
+                        "name": "Cappuccino",
+                        "category": "Espresso Based",
+                        "size": "Hot Tall ₱110 · Iced Grande ₱129 · Iced Venti ₱140",
+                        "price": 110,
+                        "image": "https://146827567.cdn6.editmysite.com/uploads/1/4/6/8/146827567/VTSXMAMX2KW6A5CK3OMFAUES.jpeg",
+                        "tag": "Espresso Based",
+                        "description": "Cappuccino from the Pop Box Cafe menu."
+            },
+            {
+                        "id": 21,
+                        "name": "Caramel Macchiato",
+                        "category": "Espresso Based",
+                        "size": "Hot Tall ₱115 · Iced Grande ₱149 · Iced Venti ₱155",
+                        "price": 115,
+                        "image": "https://images.unsplash.com/photo-1495474472287-4d71bcdd2085?auto=format&fit=crop&w=700&q=85",
+                        "tag": "Espresso Based",
+                        "description": "Caramel Macchiato from the Pop Box Cafe menu."
+            },
+            {
+                        "id": 22,
+                        "name": "Vanilla Latte",
+                        "category": "Espresso Based",
+                        "size": "Hot Tall ₱110 · Iced Grande ₱139 · Iced Venti ₱150",
+                        "price": 110,
+                        "image": "https://146827567.cdn6.editmysite.com/uploads/1/4/6/8/146827567/VTSXMAMX2KW6A5CK3OMFAUES.jpeg",
+                        "tag": "Espresso Based",
+                        "description": "Vanilla Latte from the Pop Box Cafe menu."
+            },
+            {
+                        "id": 23,
+                        "name": "Hazelnut Latte",
+                        "category": "Espresso Based",
+                        "size": "Hot Tall ₱110 · Iced Grande ₱139 · Iced Venti ₱150",
+                        "price": 110,
+                        "image": "https://images.unsplash.com/photo-1495474472287-4d71bcdd2085?auto=format&fit=crop&w=700&q=85",
+                        "tag": "Espresso Based",
+                        "description": "Hazelnut Latte from the Pop Box Cafe menu."
+            },
+            {
+                        "id": 24,
+                        "name": "Strawberry Latte",
+                        "category": "Espresso Based",
+                        "size": "Hot Tall ₱120 · Iced Grande ₱149 · Iced Venti ₱155",
+                        "price": 120,
+                        "image": "https://images.deliveryhero.io/image/fd-ph/products/66375844.jpg?width=720",
+                        "tag": "Espresso Based",
+                        "description": "Strawberry Latte from the Pop Box Cafe menu."
+            },
+            {
+                        "id": 25,
+                        "name": "Salted Caramel",
+                        "category": "Espresso Based",
+                        "size": "Hot Tall ₱115 · Iced Grande ₱139 · Iced Venti ₱150",
+                        "price": 115,
+                        "image": "https://images.unsplash.com/photo-1495474472287-4d71bcdd2085?auto=format&fit=crop&w=700&q=85",
+                        "tag": "Espresso Based",
+                        "description": "Salted Caramel from the Pop Box Cafe menu."
+            },
+            {
+                        "id": 26,
+                        "name": "White Chocolate",
+                        "category": "Espresso Based",
+                        "size": "Hot Tall ₱115 · Iced Grande ₱149 · Iced Venti ₱155",
+                        "price": 115,
+                        "image": "https://images.unsplash.com/photo-1495474472287-4d71bcdd2085?auto=format&fit=crop&w=700&q=85",
+                        "tag": "Espresso Based",
+                        "description": "White Chocolate from the Pop Box Cafe menu."
+            },
+            {
+                        "id": 27,
+                        "name": "Dark Chocolate",
+                        "category": "Espresso Based",
+                        "size": "Hot Tall ₱120 · Iced Grande ₱145 · Iced Venti ₱160",
+                        "price": 120,
+                        "image": "https://images.deliveryhero.io/image/fd-ph/products/66375844.jpg?width=720",
+                        "tag": "Espresso Based",
+                        "description": "Dark Chocolate from the Pop Box Cafe menu."
+            },
+            {
+                        "id": 28,
+                        "name": "Mocha Latte",
+                        "category": "Espresso Based",
+                        "size": "Hot Tall ₱115 · Iced Grande ₱139 · Iced Venti ₱145",
+                        "price": 115,
+                        "image": "https://images.unsplash.com/photo-1495474472287-4d71bcdd2085?auto=format&fit=crop&w=700&q=85",
+                        "tag": "Espresso Based",
+                        "description": "Mocha Latte from the Pop Box Cafe menu."
+            },
+            {
+                        "id": 29,
+                        "name": "Dirty Mocha",
+                        "category": "Espresso Based",
+                        "size": "Hot Tall ₱120 · Iced Grande ₱130 · Iced Venti ₱145",
+                        "price": 120,
+                        "image": "https://images.deliveryhero.io/image/fd-ph/products/66375844.jpg?width=720",
+                        "tag": "Espresso Based",
+                        "description": "Dirty Mocha from the Pop Box Cafe menu."
+            },
+            {
+                        "id": 30,
+                        "name": "Spanish Latte",
+                        "category": "Espresso Based",
+                        "size": "Hot Tall ₱110 · Iced Grande ₱119 · Iced Venti ₱130",
+                        "price": 110,
+                        "image": "https://images.deliveryhero.io/image/fd-ph/products/66375844.jpg?width=720",
+                        "tag": "Espresso Based",
+                        "description": "Spanish Latte from the Pop Box Cafe menu."
+            },
+            {
+                        "id": 31,
+                        "name": "Milky Strawberry",
+                        "category": "Non-Coffee",
+                        "size": "₱95 · Large price varies",
+                        "price": 95,
+                        "image": "https://shop.possmei.com/cdn/shop/files/be1a3afb44f3fb78a80b1a46034666c0.png?v=1747043675&width=480",
+                        "tag": "Non-Coffee",
+                        "description": "Milky Strawberry from the Pop Box Cafe menu."
+            },
+            {
+                        "id": 32,
+                        "name": "Milky Blueberry",
+                        "category": "Non-Coffee",
+                        "size": "₱95 · Large price varies",
+                        "price": 95,
+                        "image": "https://images.deliveryhero.io/image/fd-ph/products/10539198.jpg?width=720",
+                        "tag": "Non-Coffee",
+                        "description": "Milky Blueberry from the Pop Box Cafe menu."
+            },
+            {
+                        "id": 33,
+                        "name": "Milky Mango",
+                        "category": "Non-Coffee",
+                        "size": "₱95 · Large price varies",
+                        "price": 95,
+                        "image": "https://myjoybubble.com/wp-content/uploads/2021/11/red-velvet-cheesecake-milk-tea-L.png",
+                        "tag": "Non-Coffee",
+                        "description": "Milky Mango from the Pop Box Cafe menu."
+            },
+            {
+                        "id": 34,
+                        "name": "Strawberry Latte",
+                        "category": "Non-Coffee",
+                        "size": "₱99 · Large price varies",
+                        "price": 99,
+                        "image": "https://myjoybubble.com/wp-content/uploads/2021/11/red-velvet-cheesecake-milk-tea-L.png",
+                        "tag": "Non-Coffee",
+                        "description": "Strawberry Latte from the Pop Box Cafe menu."
+            },
+            {
+                        "id": 35,
+                        "name": "Deep Choco Latte",
+                        "category": "Non-Coffee",
+                        "size": "₱99 · Large price varies",
+                        "price": 99,
+                        "image": "https://images.deliveryhero.io/image/fd-ph/products/10539198.jpg?width=720",
+                        "tag": "Non-Coffee",
+                        "description": "Deep Choco Latte from the Pop Box Cafe menu."
+            },
+            {
+                        "id": 36,
+                        "name": "Matcha Latte",
+                        "category": "Non-Coffee",
+                        "size": "₱115 · Large price varies",
+                        "price": 115,
+                        "image": "https://www.nudon.co.uk/site/assets/images/uploads/765_3200_df84abe3df8a_o.png",
+                        "tag": "Non-Coffee",
+                        "description": "Matcha Latte from the Pop Box Cafe menu."
+            },
+            {
+                        "id": 37,
+                        "name": "Strawberry Matcha",
+                        "category": "Non-Coffee",
+                        "size": "₱120 · Large price varies",
+                        "price": 120,
+                        "image": "https://shop.possmei.com/cdn/shop/files/be1a3afb44f3fb78a80b1a46034666c0.png?v=1747043675&width=480",
+                        "tag": "Non-Coffee",
+                        "description": "Strawberry Matcha from the Pop Box Cafe menu."
+            },
+            {
+                        "id": 38,
+                        "name": "Siomai",
+                        "category": "Silog Meals",
+                        "size": "₱59",
+                        "price": 59,
+                        "image": "https://commons.wikimedia.org/wiki/Special:FilePath/Siomai_with_rice_on_a_bed.jpg",
+                        "tag": "Silog Meals",
+                        "description": "Siomai from the Pop Box Cafe menu."
+            },
+            {
+                        "id": 39,
+                        "name": "Tapa",
+                        "category": "Silog Meals",
+                        "size": "₱69",
+                        "price": 69,
+                        "image": "https://images.deliveryhero.io/image/fd-ph/products/41549311.jpg?width=720",
+                        "tag": "Silog Meals",
+                        "description": "Tapa from the Pop Box Cafe menu."
+            },
+            {
+                        "id": 40,
+                        "name": "Tocino",
+                        "category": "Silog Meals",
+                        "size": "₱69",
+                        "price": 69,
+                        "image": "https://snapcalorie-webflow-website.s3.us-east-2.amazonaws.com/media/food_pics_v2/medium/tocilog.jpg",
+                        "tag": "Silog Meals",
+                        "description": "Tocino from the Pop Box Cafe menu."
+            },
+            {
+                        "id": 41,
+                        "name": "Hotdog",
+                        "category": "Silog Meals",
+                        "size": "₱69",
+                        "price": 69,
+                        "image": "https://www.willflyforfood.net/wp-content/uploads/2022/10/silog-hotsilog.jpg",
+                        "tag": "Silog Meals",
+                        "description": "Hotdog from the Pop Box Cafe menu."
+            },
+            {
+                        "id": 42,
+                        "name": "Embutido",
+                        "category": "Silog Meals",
+                        "size": "₱79",
+                        "price": 79,
+                        "image": "https://www.goldilocks.com.ph/upload/files/2023/promos/2024/Foodshop/FS%20CORP6%20pc%20Lumpiang%20Shanghai.jpg",
+                        "tag": "Silog Meals",
+                        "description": "Embutido from the Pop Box Cafe menu."
+            },
+            {
+                        "id": 43,
+                        "name": "Longganisa",
+                        "category": "Silog Meals",
+                        "size": "₱79",
+                        "price": 79,
+                        "image": "https://images.deliveryhero.io/image/fd-ph/products/41549311.jpg?width=720",
+                        "tag": "Silog Meals",
+                        "description": "Longganisa from the Pop Box Cafe menu."
+            },
+            {
+                        "id": 44,
+                        "name": "Lechon Kawali",
+                        "category": "Silog Meals",
+                        "size": "₱79",
+                        "price": 79,
+                        "image": "https://images.deliveryhero.io/image/fd-ph/products/41549311.jpg?width=720",
+                        "tag": "Silog Meals",
+                        "description": "Lechon Kawali from the Pop Box Cafe menu."
+            },
+            {
+                        "id": 45,
+                        "name": "Shanghai",
+                        "category": "Silog Meals",
+                        "size": "₱79",
+                        "price": 79,
+                        "image": "https://www.goldilocks.com.ph/upload/files/2023/promos/2024/Foodshop/FS%20CORP6%20pc%20Lumpiang%20Shanghai.jpg",
+                        "tag": "Silog Meals",
+                        "description": "Shanghai from the Pop Box Cafe menu."
+            },
+            {
+                        "id": 46,
+                        "name": "Luncheon",
+                        "category": "Silog Meals",
+                        "size": "₱79",
+                        "price": 79,
+                        "image": "https://snapcalorie-webflow-website.s3.us-east-2.amazonaws.com/media/food_pics_v2/medium/tocilog.jpg",
+                        "tag": "Silog Meals",
+                        "description": "Luncheon from the Pop Box Cafe menu."
+            },
+            {
+                        "id": 47,
+                        "name": "Sisig",
+                        "category": "Sizzlings",
+                        "size": "₱69",
+                        "price": 69,
+                        "image": "https://images.deliveryhero.io/image/fd-ph/Products/27691292.jpg?width=1000",
+                        "tag": "Sizzlings",
+                        "description": "Sisig from the Pop Box Cafe menu."
+            },
+            {
+                        "id": 48,
+                        "name": "Hungarian",
+                        "category": "Sizzlings",
+                        "size": "₱99",
+                        "price": 99,
+                        "image": "https://food.fnr.sndimg.com/content/dam/images/food/fullset/2021/03/18/0/FNK_CHICKEN_KATSU_H_f_s4x3.jpg.rend.hgtvcom.686.515.suffix/1616083203181.jpeg",
+                        "tag": "Sizzlings",
+                        "description": "Hungarian from the Pop Box Cafe menu."
+            },
+            {
+                        "id": 49,
+                        "name": "Burgersteak",
+                        "category": "Sizzlings",
+                        "size": "₱99",
+                        "price": 99,
+                        "image": "https://cdn.sanity.io/images/f3knbc2s/production/cccfec5d94fa71e8a28c25ce784a20dd3291f5aa-2500x1500.jpg",
+                        "tag": "Sizzlings",
+                        "description": "Burgersteak from the Pop Box Cafe menu."
+            },
+            {
+                        "id": 50,
+                        "name": "Chicken Tonkatsu",
+                        "category": "Sizzlings",
+                        "size": "₱109",
+                        "price": 109,
+                        "image": "https://food.fnr.sndimg.com/content/dam/images/food/fullset/2021/03/18/0/FNK_CHICKEN_KATSU_H_f_s4x3.jpg.rend.hgtvcom.686.515.suffix/1616083203181.jpeg",
+                        "tag": "Sizzlings",
+                        "description": "Chicken Tonkatsu from the Pop Box Cafe menu."
+            },
+            {
+                        "id": 51,
+                        "name": "Porkchop",
+                        "category": "Sizzlings",
+                        "size": "₱129",
+                        "price": 129,
+                        "image": "https://images.deliveryhero.io/image/fd-ph/products/13167588.jpg?width=720",
+                        "tag": "Sizzlings",
+                        "description": "Porkchop from the Pop Box Cafe menu."
+            },
+            {
+                        "id": 52,
+                        "name": "2pcs Teriyaki Wings",
+                        "category": "Wings",
+                        "size": "₱89",
+                        "price": 89,
+                        "image": "https://travelingandfood.com/img/sticky-teriyaki-chicken-wings.jpg",
+                        "tag": "Wings",
+                        "description": "2pcs Teriyaki Wings from the Pop Box Cafe menu."
+            },
+            {
+                        "id": 53,
+                        "name": "2pcs Honey Butter Wings",
+                        "category": "Wings",
+                        "size": "₱89",
+                        "price": 89,
+                        "image": "https://www.willflyforfood.net/wp-content/uploads/2022/10/silog-hotsilog.jpg",
+                        "tag": "Wings",
+                        "description": "2pcs Honey Butter Wings from the Pop Box Cafe menu."
+            },
+            {
+                        "id": 54,
+                        "name": "2pcs Buffalo Wings",
+                        "category": "Wings",
+                        "size": "₱89",
+                        "price": 89,
+                        "image": "https://images.deliveryhero.io/image/fd-ph/Products/27691292.jpg?width=1000",
+                        "tag": "Wings",
+                        "description": "2pcs Buffalo Wings from the Pop Box Cafe menu."
+            },
+            {
+                        "id": 55,
+                        "name": "2pcs Barbeque Wings",
+                        "category": "Wings",
+                        "size": "₱89",
+                        "price": 89,
+                        "image": "https://images.deliveryhero.io/image/fd-ph/Products/27691292.jpg?width=1000",
+                        "tag": "Wings",
+                        "description": "2pcs Barbeque Wings from the Pop Box Cafe menu."
+            },
+            {
+                        "id": 56,
+                        "name": "2pcs Soy Garlic Wings",
+                        "category": "Wings",
+                        "size": "₱89",
+                        "price": 89,
+                        "image": "https://travelingandfood.com/img/sticky-teriyaki-chicken-wings.jpg",
+                        "tag": "Wings",
+                        "description": "2pcs Soy Garlic Wings from the Pop Box Cafe menu."
+            },
+            {
+                        "id": 57,
+                        "name": "2pcs Garlic Parmesan Wings",
+                        "category": "Wings",
+                        "size": "₱89",
+                        "price": 89,
+                        "image": "https://travelingandfood.com/img/sticky-teriyaki-chicken-wings.jpg",
+                        "tag": "Wings",
+                        "description": "2pcs Garlic Parmesan Wings from the Pop Box Cafe menu."
+            },
+            {
+                        "id": 58,
+                        "name": "Fries",
+                        "category": "Snacks",
+                        "size": "₱59",
+                        "price": 59,
+                        "image": "https://commons.wikimedia.org/wiki/Special:FilePath/ROSAM_Special_Fried_Siomai.jpg",
+                        "tag": "Snacks",
+                        "description": "Fries from the Pop Box Cafe menu."
+            },
+            {
+                        "id": 59,
+                        "name": "Nachos Overload",
+                        "category": "Snacks",
+                        "size": "₱99",
+                        "price": 99,
+                        "image": "https://cdn.sanity.io/images/f3knbc2s/production/cccfec5d94fa71e8a28c25ce784a20dd3291f5aa-2500x1500.jpg",
+                        "tag": "Snacks",
+                        "description": "Nachos Overload from the Pop Box Cafe menu."
+            },
+            {
+                        "id": 60,
+                        "name": "Cheese Sticks",
+                        "category": "Snacks",
+                        "size": "₱40",
+                        "price": 40,
+                        "image": "https://www.goldilocks.com.ph/upload/files/2023/promos/2024/Foodshop/FS%20CORP6%20pc%20Lumpiang%20Shanghai.jpg",
+                        "tag": "Snacks",
+                        "description": "Cheese Sticks from the Pop Box Cafe menu."
+            },
+            {
+                        "id": 61,
+                        "name": "Hamburger",
+                        "category": "Snacks",
+                        "size": "₱40",
+                        "price": 40,
+                        "image": "https://travelingandfood.com/img/sticky-teriyaki-chicken-wings.jpg",
+                        "tag": "Snacks",
+                        "description": "Hamburger from the Pop Box Cafe menu."
+            },
+            {
+                        "id": 62,
+                        "name": "Fried Siomai 4pcs",
+                        "category": "Snacks",
+                        "size": "₱40",
+                        "price": 40,
+                        "image": "https://commons.wikimedia.org/wiki/Special:FilePath/ROSAM_Special_Fried_Siomai.jpg",
+                        "tag": "Snacks",
+                        "description": "Fried Siomai 4pcs from the Pop Box Cafe menu."
+            },
+            {
+                        "id": 63,
+                        "name": "Fried Gyosa 5pcs",
+                        "category": "Snacks",
+                        "size": "₱99",
+                        "price": 99,
+                        "image": "https://travelingandfood.com/img/sticky-teriyaki-chicken-wings.jpg",
+                        "tag": "Snacks",
+                        "description": "Fried Gyosa 5pcs from the Pop Box Cafe menu."
+            },
+            {
+                        "id": 64,
+                        "name": "Lechon Kawali 250g",
+                        "category": "Platter",
+                        "size": "₱160",
+                        "price": 160,
+                        "image": "https://travelingandfood.com/img/sticky-teriyaki-chicken-wings.jpg",
+                        "tag": "Platter",
+                        "description": "Lechon Kawali 250g from the Pop Box Cafe menu."
+            },
+            {
+                        "id": 65,
+                        "name": "Lechon Kawali 500g",
+                        "category": "Platter",
+                        "size": "₱350",
+                        "price": 350,
+                        "image": "https://snapcalorie-webflow-website.s3.us-east-2.amazonaws.com/media/food_pics_v2/medium/tocilog.jpg",
+                        "tag": "Platter",
+                        "description": "Lechon Kawali 500g from the Pop Box Cafe menu."
+            },
+            {
+                        "id": 66,
+                        "name": "Crispy Sisig 250g",
+                        "category": "Platter",
+                        "size": "₱200",
+                        "price": 200,
+                        "image": "https://images.deliveryhero.io/image/fd-ph/Products/27691292.jpg?width=1000",
+                        "tag": "Platter",
+                        "description": "Crispy Sisig 250g from the Pop Box Cafe menu."
+            },
+            {
+                        "id": 67,
+                        "name": "Crispy Pata",
+                        "category": "Platter",
+                        "size": "₱850",
+                        "price": 850,
+                        "image": "https://images.deliveryhero.io/image/fd-ph/Products/27691292.jpg?width=1000",
+                        "tag": "Platter",
+                        "description": "Crispy Pata from the Pop Box Cafe menu."
+            },
+            {
+                        "id": 68,
+                        "name": "Chicken Wings 6pcs",
+                        "category": "Platter",
+                        "size": "₱185",
+                        "price": 185,
+                        "image": "https://images.deliveryhero.io/image/fd-ph/products/13167588.jpg?width=720",
+                        "tag": "Platter",
+                        "description": "Chicken Wings 6pcs from the Pop Box Cafe menu."
+            },
+            {
+                        "id": 69,
+                        "name": "Chicken Wings 8pcs",
+                        "category": "Platter",
+                        "size": "₱235",
+                        "price": 235,
+                        "image": "https://travelingandfood.com/img/sticky-teriyaki-chicken-wings.jpg",
+                        "tag": "Platter",
+                        "description": "Chicken Wings 8pcs from the Pop Box Cafe menu."
+            },
+            {
+                        "id": 70,
+                        "name": "Egg",
+                        "category": "Extras",
+                        "size": "₱15",
+                        "price": 15,
+                        "image": "https://prcdn.freetls.fastly.net/release_image/23968/292/23968-292-30e299b61019662681c06fb5deda564d-1920x1400.jpg?auto=webp&bg-color=fff&fit=bounds&format=jpeg&height=1350&quality=85%2C65&width=1950",
+                        "tag": "Extras",
+                        "description": "Egg from the Pop Box Cafe menu."
+            },
+            {
+                        "id": 71,
+                        "name": "Rice",
+                        "category": "Extras",
+                        "size": "₱15",
+                        "price": 15,
+                        "image": "https://images.deliveryhero.io/image/fd-ph/products/66375844.jpg?width=720",
+                        "tag": "Extras",
+                        "description": "Rice from the Pop Box Cafe menu."
+            },
+            {
+                        "id": 72,
+                        "name": "Coke",
+                        "category": "Extras",
+                        "size": "₱25",
+                        "price": 25,
+                        "image": "https://snapcalorie-webflow-website.s3.us-east-2.amazonaws.com/media/food_pics_v2/medium/blueberry_italian_soda.jpg",
+                        "tag": "Extras",
+                        "description": "Coke from the Pop Box Cafe menu."
+            },
+            {
+                        "id": 73,
+                        "name": "Mountain Dew",
+                        "category": "Extras",
+                        "size": "₱25",
+                        "price": 25,
+                        "image": "https://prcdn.freetls.fastly.net/release_image/23968/292/23968-292-30e299b61019662681c06fb5deda564d-1920x1400.jpg?auto=webp&bg-color=fff&fit=bounds&format=jpeg&height=1350&quality=85%2C65&width=1950",
+                        "tag": "Extras",
+                        "description": "Mountain Dew from the Pop Box Cafe menu."
+            },
+            {
+                        "id": 74,
+                        "name": "Bottled Water",
+                        "category": "Extras",
+                        "size": "₱25",
+                        "price": 25,
+                        "image": "https://images.deliveryhero.io/image/fd-ph/products/66375844.jpg?width=720",
+                        "tag": "Extras",
+                        "description": "Bottled Water from the Pop Box Cafe menu."
+            },
+            {
+                        "id": 75,
+                        "name": "Pineapple Juice",
+                        "category": "Extras",
+                        "size": "₱45",
+                        "price": 45,
+                        "image": "https://prcdn.freetls.fastly.net/release_image/23968/292/23968-292-30e299b61019662681c06fb5deda564d-1920x1400.jpg?auto=webp&bg-color=fff&fit=bounds&format=jpeg&height=1350&quality=85%2C65&width=1950",
+                        "tag": "Extras",
+                        "description": "Pineapple Juice from the Pop Box Cafe menu."
+            },
+            {
+                        "id": 76,
+                        "name": "C2",
+                        "category": "Extras",
+                        "size": "₱35",
+                        "price": 35,
+                        "image": "https://commons.wikimedia.org/wiki/Special:FilePath/Siomai_with_rice_on_a_bed.jpg",
+                        "tag": "Extras",
+                        "description": "C2 from the Pop Box Cafe menu."
+            },
+            {
+                        "id": 77,
+                        "name": "Espresso Shot",
+                        "category": "Extras",
+                        "size": "₱35",
+                        "price": 35,
+                        "image": "https://images.unsplash.com/photo-1495474472287-4d71bcdd2085?auto=format&fit=crop&w=700&q=85",
+                        "tag": "Add-ons",
+                        "description": "Espresso Shot from the Pop Box Cafe menu."
+            },
+            {
+                        "id": 78,
+                        "name": "Whipped Cream",
+                        "category": "Extras",
+                        "size": "₱25",
+                        "price": 25,
+                        "image": "https://prcdn.freetls.fastly.net/release_image/23968/292/23968-292-30e299b61019662681c06fb5deda564d-1920x1400.jpg?auto=webp&bg-color=fff&fit=bounds&format=jpeg&height=1350&quality=85%2C65&width=1950",
+                        "tag": "Add-ons",
+                        "description": "Whipped Cream from the Pop Box Cafe menu."
+            },
+            {
+                        "id": 79,
+                        "name": "Syrup",
+                        "category": "Extras",
+                        "size": "₱25",
+                        "price": 25,
+                        "image": "https://snapcalorie-webflow-website.s3.us-east-2.amazonaws.com/media/food_pics_v2/medium/blueberry_italian_soda.jpg",
+                        "tag": "Add-ons",
+                        "description": "Syrup from the Pop Box Cafe menu."
+            },
+            {
+                        "id": 80,
+                        "name": "Sauce",
+                        "category": "Extras",
+                        "size": "₱25",
+                        "price": 25,
+                        "image": "https://images.deliveryhero.io/image/fd-ph/products/66375844.jpg?width=720",
+                        "tag": "Add-ons",
+                        "description": "Sauce from the Pop Box Cafe menu."
+            },
+            {
+                        "id": 81,
+                        "name": "Milk",
+                        "category": "Extras",
+                        "size": "₱35",
+                        "price": 35,
+                        "image": "https://commons.wikimedia.org/wiki/Special:FilePath/Siomai_with_rice_on_a_bed.jpg",
+                        "tag": "Add-ons",
+                        "description": "Milk from the Pop Box Cafe menu."
+            },
+            {
+                        "id": 82,
+                        "name": "Fruit Jelly",
+                        "category": "Extras",
+                        "size": "₱15",
+                        "price": 15,
+                        "image": "https://snapcalorie-webflow-website.s3.us-east-2.amazonaws.com/media/food_pics_v2/medium/blueberry_italian_soda.jpg",
+                        "tag": "Add-ons",
+                        "description": "Fruit Jelly from the Pop Box Cafe menu."
+            },
+            {
+                        "id": 83,
+                        "name": "Pearl",
+                        "category": "Extras",
+                        "size": "₱15",
+                        "price": 15,
+                        "image": "https://prcdn.freetls.fastly.net/release_image/23968/292/23968-292-30e299b61019662681c06fb5deda564d-1920x1400.jpg?auto=webp&bg-color=fff&fit=bounds&format=jpeg&height=1350&quality=85%2C65&width=1950",
+                        "tag": "Add-ons",
+                        "description": "Pearl from the Pop Box Cafe menu."
+            }
+];
+
+        const POPBOX_PRODUCTS_KEY = 'popbox_menu_v1';
+
+        // The staff menu is the source of truth for price and availability.
+        // Customer-only descriptions and photos are preserved for the original items.
+        function syncMenuAvailability() {
+            let savedProducts = [];
+            try { savedProducts = JSON.parse(localStorage.getItem(POPBOX_PRODUCTS_KEY) || '[]'); }
+            catch (error) { savedProducts = []; }
+            // Ignore old prototype storage that contains only the original demo products.
+            // The current POP BOX menu contains 83 listed items; staff dashboard is migrated too.
+            if (!Array.isArray(savedProducts) || savedProducts.length < 70) return;
+
+            // If staff removed a menu item, remove it from the customer menu too.
+            for (let i = menuData.length - 1; i >= 0; i--) {
+                const stillExists = savedProducts.some(product =>
+                    String(product.id) === String(menuData[i].id) ||
+                    String(product.name || '').trim().toLowerCase() === String(menuData[i].name || '').trim().toLowerCase()
+                );
+                if (!stillExists) menuData.splice(i, 1);
+            }
+
+            savedProducts.forEach(product => {
+                const existing = menuData.find(item =>
+                    String(item.id) === String(product.id) ||
+                    String(item.name || '').trim().toLowerCase() === String(product.name || '').trim().toLowerCase()
+                );
+                if (existing) {
+                    existing.available = product.available !== false;
+                    if (Number.isFinite(Number(product.price))) existing.price = Number(product.price);
+                    if (product.category) existing.category = product.category;
+                    return;
+                }
+
+                // Support new staff-added menu items (for example, food and snacks).
+                if (!product.name) return;
+                const category = product.category || 'Other';
+                const categoryText = category.toLowerCase();
+                const isFood = /food|snack|meal|burger|sandwich|fries|pastry|cake|bread|rice|pasta|dessert/.test(categoryText + ' ' + product.name.toLowerCase());
+                menuData.push({
+                    id: product.id,
+                    name: product.name,
+                    category,
+                    size: 'Available at Pop Box Cafe',
+                    price: Number(product.price) || 0,
+                    image: product.image || (isFood
+                        ? 'https://images.unsplash.com/photo-1504674900247-0877df9cc836?auto=format&fit=crop&w=700&q=85'
+                        : 'https://images.unsplash.com/photo-1517701604599-bb29b565090c?auto=format&fit=crop&w=700&q=85'),
+                    tag: isFood ? 'Food pick' : 'Menu pick',
+                    description: product.description || `${category} item from Pop Box Cafe.`,
+                    available: product.available !== false,
+                    emoji: product.emoji || (isFood ? '🍴' : '🥤'),
+                    isFood
+                });
+            });
+        }
+
+        let cart = [];
+        let activeCategory = 'All';
+        let recommendationInputMode = 'text';
+
+        const POPBOX_ORDERS_KEY = 'popbox_orders_v1';
+        const POPBOX_ORDER_SEQ_KEY = 'popbox_order_seq_v1';
+
+        function getOrders() {
+            try { return JSON.parse(localStorage.getItem(POPBOX_ORDERS_KEY) || '[]'); }
+            catch (e) { return []; }
+        }
+
+        function saveOrders(orders) {
+            localStorage.setItem(POPBOX_ORDERS_KEY, JSON.stringify(orders));
+        }
+
+        function createOrder() {
+            const seq = Number(localStorage.getItem(POPBOX_ORDER_SEQ_KEY) || '1000') + 1;
+            localStorage.setItem(POPBOX_ORDER_SEQ_KEY, String(seq));
+            const total = cart.reduce((sum, i) => sum + i.price * i.qty, 0);
+
+            return {
+                id: `PB-${seq}`,
+                table: 'Table 1',
+                customer: 'Walk-in Customer',
+                items: cart.map(i => ({
+                    id: i.id, name: i.name, qty: i.qty, price: i.price
+                })),
+                total,
+                status: 'pending',
+                paymentStatus: 'pending',
+                createdAt: new Date().toISOString()
+            };
+        }
+
+        function broadcastOrderChange() {
+            window.dispatchEvent(new Event('popbox-order-created'));
+        }
+
+        window.addEventListener('DOMContentLoaded', () => {
+            syncMenuAvailability();
+            renderTopPicks();
+            renderMenu(menuData);
+        });
+
+        // Use truthful, item-specific illustrations instead of repeating unrelated stock photos.
+        // Direct photo URLs are used here because the previous random-image host failed to load.
+        // Exact product-match photos are preferred; other menu photos are resolved against Wikimedia Commons.
+        // Explicit photo choices by menu ID; supplied local files take priority where available.
+        const MENU_PHOTO_OVERRIDES = {
+            "1": "https://framerusercontent.com/images/L0DKPuhjiQG0EBdp6Gm0hUexc.jpg",
+            "2": "https://abdistribution.ca/cdn/shop/products/MilTea002resized_700x700.jpg?v=1660334628",
+            "3": "https://images.deliveryhero.io/image/fd-ph/LH/rjru-listing.jpg",
+            "4": "https://www.nudon.co.uk/site/assets/images/uploads/765_3200_df84abe3df8a_o.png",
+            "5": "https://shop.possmei.com/cdn/shop/files/be1a3afb44f3fb78a80b1a46034666c0.png?v=1747043675&width=480",
+            "6": "https://images.deliveryhero.io/image/fd-ph/products/10539198.jpg?width=720",
+            "7": "https://myjoybubble.com/wp-content/uploads/2021/11/red-velvet-cheesecake-milk-tea-L.png",
+            "8": "assets/menu/lychee.png",
+            "9": "assets/menu/strawberry.png",
+            "10": "https://snapcalorie-webflow-website.s3.us-east-2.amazonaws.com/media/food_pics_v2/medium/blueberry_italian_soda.jpg",
+            "11": "https://i.pinimg.com/originals/cf/09/3a/cf093a1643884dc7923e28275dd7c40c.png",
+            "12": "https://prcdn.freetls.fastly.net/release_image/23968/292/23968-292-30e299b61019662681c06fb5deda564d-1920x1400.jpg?auto=webp&bg-color=fff&fit=bounds&format=jpeg&height=1350&quality=85%2C65&width=1950",
+            "13": "assets/menu/grapes.png",
+            "14": "assets/menu/honey%20peach.png",
+            "15": "assets/menu/lemon.png",
+            "16": "assets/menu/passion%20fruit.png",
+            "17": "assets/menu/kiwi.png",
+            "19": "assets/menu/Cafe%20Latte.jpg",
+            "20": "assets/menu/Cappuccino.jpg",
+            "21": "assets/menu/Caramel%20Macchiato.jpg",
+            "22": "https://146827567.cdn6.editmysite.com/uploads/1/4/6/8/146827567/VTSXMAMX2KW6A5CK3OMFAUES.jpeg",
+            "23": "assets/menu/Hazelnut%20Latte.jpg",
+            "25": "assets/menu/Salted%20Caramel.jpg",
+            "26": "assets/menu/White%20Chocolate.png",
+            "27": "https://images.deliveryhero.io/image/fd-ph/products/66375844.jpg?width=720",
+            "28": "assets/menu/Mocha%20Latte.jpg",
+            "29": "assets/menu/Dirty%20Mocha.jpg",
+            "30": "assets/menu/Spanish%20Latte.png",
+            "31": "assets/menu/milk%20strawberry%20latte%20non%20coffee.png",
+            "32": "assets/menu/milky%20blue%20berry%20latte%20non%20coffee.png",
+            "33": "assets/menu/milky%20mango%20latte%20non%20coffee.png",
+            "34": "assets/menu/strawberry%20latte%20non%20coffee.png",
+            "35": "assets/menu/deep%20choco%20latte%20non%20coffee.png",
+            "36": "assets/menu/matcha%20latte.png",
+            "37": "assets/menu/strawberry%20matcha.png",
+            "38": "assets/menu/sioma.jpg",
+            "39": "assets/menu/tapa.jpg",
+            "40": "https://snapcalorie-webflow-website.s3.us-east-2.amazonaws.com/media/food_pics_v2/medium/tocilog.jpg",
+            "41": "https://www.willflyforfood.net/wp-content/uploads/2022/10/silog-hotsilog.jpg",
+            "42": "assets/menu/embutido%20silog.jpg",
+            "43": "https://images.deliveryhero.io/image/fd-ph/products/41549311.jpg?width=720",
+            "44": "assets/menu/lechon%20kawali.jpg",
+            "45": "assets/menu/shanghai.jpg",
+            "47": "https://images.deliveryhero.io/image/fd-ph/Products/27691292.jpg?width=1000",
+            "48": "assets/menu/hunggarian.jpg",
+            "49": "assets/menu/burgersteak.jpg",
+            "50": "https://food.fnr.sndimg.com/content/dam/images/food/fullset/2021/03/18/0/FNK_CHICKEN_KATSU_H_f_s4x3.jpg.rend.hgtvcom.686.515.suffix/1616083203181.jpeg",
+            "51": "https://images.deliveryhero.io/image/fd-ph/products/13167588.jpg?width=720",
+            "52": "https://travelingandfood.com/img/sticky-teriyaki-chicken-wings.jpg",
+            "53": "assets/menu/2pcs%20Honey%20Butter%20Wings.jpg",
+            "54": "assets/menu/Buffalo%20Wings.jpg",
+            "55": "assets/menu/Barbeque%20Wings.jpg",
+            "56": "assets/menu/Soy%20Garlic%20Wings.jpg",
+            "57": "assets/menu/Garlic%20Parmesan%20Wings.jpeg",
+            "58": "assets/menu/Fries.jpg",
+            "59": "assets/menu/Nachos%20Overload.jpg",
+            "60": "assets/menu/Cheese%20Sticks.jpg",
+            "61": "assets/menu/Hamburger.jpg",
+            "62": "assets/menu/Fried%20Siomai%204pcs.jpg",
+            "63": "assets/menu/Fried%20Gyosa.jpg",
+            "66": "assets/menu/Crispy%20Sisig%20250g.jpg",
+            "67": "assets/menu/Crispy%20Pata.jpg",
+            "77": "https://images.unsplash.com/photo-1495474472287-4d71bcdd2085?auto=format&fit=crop&w=700&q=85"
+};
+        const MENU_PHOTO_POOLS = {
+            "Milk Tea": [
+                        "https://framerusercontent.com/images/L0DKPuhjiQG0EBdp6Gm0hUexc.jpg",
+                        "https://abdistribution.ca/cdn/shop/products/MilTea002resized_700x700.jpg?v=1660334628",
+                        "https://images.deliveryhero.io/image/fd-ph/LH/rjru-listing.jpg",
+                        "https://www.nudon.co.uk/site/assets/images/uploads/765_3200_df84abe3df8a_o.png",
+                        "https://shop.possmei.com/cdn/shop/files/be1a3afb44f3fb78a80b1a46034666c0.png?v=1747043675&width=480",
+                        "https://images.deliveryhero.io/image/fd-ph/products/10539198.jpg?width=720",
+                        "https://myjoybubble.com/wp-content/uploads/2021/11/red-velvet-cheesecake-milk-tea-L.png"
+            ],
+            "Fruit Soda": [
+                        "https://snapcalorie-webflow-website.s3.us-east-2.amazonaws.com/media/food_pics_v2/medium/blueberry_italian_soda.jpg",
+                        "https://i.pinimg.com/originals/cf/09/3a/cf093a1643884dc7923e28275dd7c40c.png",
+                        "https://prcdn.freetls.fastly.net/release_image/23968/292/23968-292-30e299b61019662681c06fb5deda564d-1920x1400.jpg?auto=webp&bg-color=fff&fit=bounds&format=jpeg&height=1350&quality=85%2C65&width=1950",
+                        "https://images.unsplash.com/photo-1544145945-f90425340c7e?auto=format&fit=crop&w=700&q=85",
+                        "https://framerusercontent.com/images/L0DKPuhjiQG0EBdp6Gm0hUexc.jpg"
+            ],
+            "Espresso Based": [
+                        "https://146827567.cdn6.editmysite.com/uploads/1/4/6/8/146827567/VTSXMAMX2KW6A5CK3OMFAUES.jpeg",
+                        "https://images.deliveryhero.io/image/fd-ph/products/66375844.jpg?width=720",
+                        "https://images.unsplash.com/photo-1495474472287-4d71bcdd2085?auto=format&fit=crop&w=700&q=85",
+                        "https://images.unsplash.com/photo-1495474472287-4d71bcdd2085?auto=format&fit=crop&w=700&q=85",
+                        "https://images.deliveryhero.io/image/fd-ph/products/66375844.jpg?width=720"
+            ],
+            "Non-Coffee": [
+                        "https://images.deliveryhero.io/image/fd-ph/LH/rjru-listing.jpg",
+                        "https://www.nudon.co.uk/site/assets/images/uploads/765_3200_df84abe3df8a_o.png",
+                        "https://shop.possmei.com/cdn/shop/files/be1a3afb44f3fb78a80b1a46034666c0.png?v=1747043675&width=480",
+                        "https://images.deliveryhero.io/image/fd-ph/products/10539198.jpg?width=720",
+                        "https://myjoybubble.com/wp-content/uploads/2021/11/red-velvet-cheesecake-milk-tea-L.png",
+                        "https://snapcalorie-webflow-website.s3.us-east-2.amazonaws.com/media/food_pics_v2/medium/blueberry_italian_soda.jpg",
+                        "https://prcdn.freetls.fastly.net/release_image/23968/292/23968-292-30e299b61019662681c06fb5deda564d-1920x1400.jpg?auto=webp&bg-color=fff&fit=bounds&format=jpeg&height=1350&quality=85%2C65&width=1950"
+            ],
+            "Silog Meals": [
+                        "https://commons.wikimedia.org/wiki/Special:FilePath/Siomai_with_rice_on_a_bed.jpg",
+                        "https://snapcalorie-webflow-website.s3.us-east-2.amazonaws.com/media/food_pics_v2/medium/tocilog.jpg",
+                        "https://www.willflyforfood.net/wp-content/uploads/2022/10/silog-hotsilog.jpg",
+                        "https://images.deliveryhero.io/image/fd-ph/products/41549311.jpg?width=720",
+                        "https://www.goldilocks.com.ph/upload/files/2023/promos/2024/Foodshop/FS%20CORP6%20pc%20Lumpiang%20Shanghai.jpg",
+                        "https://images.deliveryhero.io/image/fd-ph/products/13167588.jpg?width=720"
+            ],
+            "Sizzlings": [
+                        "https://images.deliveryhero.io/image/fd-ph/Products/27691292.jpg?width=1000",
+                        "https://cdn.sanity.io/images/f3knbc2s/production/cccfec5d94fa71e8a28c25ce784a20dd3291f5aa-2500x1500.jpg",
+                        "https://food.fnr.sndimg.com/content/dam/images/food/fullset/2021/03/18/0/FNK_CHICKEN_KATSU_H_f_s4x3.jpg.rend.hgtvcom.686.515.suffix/1616083203181.jpeg",
+                        "https://images.deliveryhero.io/image/fd-ph/products/13167588.jpg?width=720",
+                        "https://snapcalorie-webflow-website.s3.us-east-2.amazonaws.com/media/food_pics_v2/medium/tocilog.jpg"
+            ],
+            "Wings": [
+                        "https://travelingandfood.com/img/sticky-teriyaki-chicken-wings.jpg",
+                        "https://images.deliveryhero.io/image/fd-ph/Products/27691292.jpg?width=1000",
+                        "https://www.willflyforfood.net/wp-content/uploads/2022/10/silog-hotsilog.jpg"
+            ],
+            "Snacks": [
+                        "https://commons.wikimedia.org/wiki/Special:FilePath/Siomai_with_rice_on_a_bed.jpg",
+                        "https://www.goldilocks.com.ph/upload/files/2023/promos/2024/Foodshop/FS%20CORP6%20pc%20Lumpiang%20Shanghai.jpg",
+                        "https://commons.wikimedia.org/wiki/Special:FilePath/ROSAM_Special_Fried_Siomai.jpg",
+                        "https://cdn.sanity.io/images/f3knbc2s/production/cccfec5d94fa71e8a28c25ce784a20dd3291f5aa-2500x1500.jpg",
+                        "https://travelingandfood.com/img/sticky-teriyaki-chicken-wings.jpg"
+            ],
+            "Platter": [
+                        "https://images.deliveryhero.io/image/fd-ph/Products/27691292.jpg?width=1000",
+                        "https://travelingandfood.com/img/sticky-teriyaki-chicken-wings.jpg",
+                        "https://www.goldilocks.com.ph/upload/files/2023/promos/2024/Foodshop/FS%20CORP6%20pc%20Lumpiang%20Shanghai.jpg",
+                        "https://images.deliveryhero.io/image/fd-ph/products/13167588.jpg?width=720",
+                        "https://snapcalorie-webflow-website.s3.us-east-2.amazonaws.com/media/food_pics_v2/medium/tocilog.jpg"
+            ],
+            "Extras": [
+                        "https://images.unsplash.com/photo-1495474472287-4d71bcdd2085?auto=format&fit=crop&w=700&q=85",
+                        "https://commons.wikimedia.org/wiki/Special:FilePath/Siomai_with_rice_on_a_bed.jpg",
+                        "https://snapcalorie-webflow-website.s3.us-east-2.amazonaws.com/media/food_pics_v2/medium/blueberry_italian_soda.jpg",
+                        "https://prcdn.freetls.fastly.net/release_image/23968/292/23968-292-30e299b61019662681c06fb5deda564d-1920x1400.jpg?auto=webp&bg-color=fff&fit=bounds&format=jpeg&height=1350&quality=85%2C65&width=1950",
+                        "https://images.deliveryhero.io/image/fd-ph/products/66375844.jpg?width=720"
+            ]
+};
+        const MENU_PHOTO_SAFE = "https://framerusercontent.com/images/L0DKPuhjiQG0EBdp6Gm0hUexc.jpg";
+        const menuPhotoLookupCache = new Map();
+        const menuPhotoQueue = [];
+        let menuPhotoLookupsActive = 0;
+        const MENU_PHOTO_LOOKUPS_MAX = 4;
+
+        function menuPhotoFallback(item) {
+            if (!item) return MENU_PHOTO_SAFE;
+            const id = String(item.id ?? '');
+            if (MENU_PHOTO_OVERRIDES[id]) return MENU_PHOTO_OVERRIDES[id];
+
+            const category = String(item.category || 'Extras');
+            const pool = MENU_PHOTO_POOLS[category] || MENU_PHOTO_POOLS['Extras'] || [MENU_PHOTO_SAFE];
+            let hash = 0;
+            const seed = `${item.name || 'Pop Box'}-${item.id || ''}`;
+            for (const ch of seed) hash = (hash * 31 + ch.charCodeAt(0)) >>> 0;
+            return pool[hash % pool.length] || MENU_PHOTO_SAFE;
+        }
+
+        function menuIllustration(item) {
+            // Normalize old saved menu data too: ignore the earlier single-image fallback.
+            const oldUrl = String(item && item.image || '');
+            const wasKnownBroken = /loremflickr\\.com|photo-1544145945-f90425340c7e/i.test(oldUrl);
+            if (!wasKnownBroken && oldUrl && !MENU_PHOTO_OVERRIDES[String(item && item.id || '')]) return oldUrl;
+            return menuPhotoFallback(item);
+        }
+
+        function menuPhotoPoolFallback(item, avoidUrl = '') {
+            if (!item) return MENU_PHOTO_SAFE;
+            const category = String(item.category || 'Extras');
+            const pool = MENU_PHOTO_POOLS[category] || MENU_PHOTO_POOLS['Extras'] || [MENU_PHOTO_SAFE];
+            const current = String(avoidUrl || '');
+            let hash = 0;
+            const seed = `${item.name || 'Pop Box'}-${item.id || ''}-backup`;
+            for (const ch of seed) hash = (hash * 31 + ch.charCodeAt(0)) >>> 0;
+            for (let offset = 0; offset < pool.length; offset++) {
+                const candidate = pool[(hash + offset) % pool.length];
+                if (candidate && candidate !== current) return candidate;
+            }
+            return MENU_PHOTO_SAFE !== current ? MENU_PHOTO_SAFE : pool[0] || MENU_PHOTO_SAFE;
+        }
+
+        function menuPhotoSearchPhrase(item) {
+            const name = String(item.name || '').replace(/\\b\\d+\\s?(?:pcs?|g)\\b/ig, '').trim();
+            const category = String(item.category || '');
+            if (category === 'Milk Tea') return `${name} milk tea bubble tea drink photograph`;
+            if (category === 'Fruit Soda') return `${name} fruit soda drink photograph`;
+            if (category === 'Espresso Based') return `${name} coffee latte drink photograph`;
+            if (category === 'Non-Coffee') return `${name} milk drink photograph`;
+            if (category === 'Silog Meals') return `Filipino ${name} silog meal with rice photograph`;
+            if (category === 'Sizzlings') return `Filipino sizzling ${name} food plate photograph`;
+            if (category === 'Wings') return `${name} chicken wings food photograph`;
+            if (category === 'Snacks') return `${name} snack food photograph`;
+            if (category === 'Platter') return `Filipino ${name} food platter photograph`;
+            if (name.toLowerCase() === 'pearl') return 'tapioca pearls bubble tea topping photograph';
+            if (name.toLowerCase() === 'c2') return 'C2 iced tea bottle Philippines photograph';
+            if (name.toLowerCase() === 'coke') return 'Coca Cola bottle can drink photograph';
+            if (name.toLowerCase() === 'mountain dew') return 'Mountain Dew soda bottle can photograph';
+            return `${name} food drink ingredient photograph`;
+        }
+
+        async function fetchCommonsMenuPhoto(item) {
+            const searchText = menuPhotoSearchPhrase(item);
+            const endpoint = new URL('https://commons.wikimedia.org/w/api.php');
+            endpoint.searchParams.set('action', 'query');
+            endpoint.searchParams.set('generator', 'search');
+            endpoint.searchParams.set('gsrsearch', searchText);
+            endpoint.searchParams.set('gsrnamespace', '6');
+            endpoint.searchParams.set('gsrlimit', '12');
+            endpoint.searchParams.set('prop', 'imageinfo');
+            endpoint.searchParams.set('iiprop', 'url');
+            endpoint.searchParams.set('iiurlwidth', '720');
+            endpoint.searchParams.set('format', 'json');
+            endpoint.searchParams.set('origin', '*');
+
+            const response = await fetch(endpoint.toString(), { mode: 'cors' });
+            if (!response.ok) throw new Error('Photo search did not respond');
+            const data = await response.json();
+            const pages = Object.values(data && data.query && data.query.pages || {})
+                .sort((a, b) => (a.index ?? 999) - (b.index ?? 999));
+            const usable = pages.filter(page => {
+                const title = String(page.title || '').toLowerCase();
+                const info = page.imageinfo && page.imageinfo[0];
+                const url = info && (info.thumburl || info.url);
+                return !!url && !/\\.(svg|ogg|ogv|pdf)(?:$|\\?)/i.test(url) &&
+                    !/logo|icon|map|diagram|flag|poster/i.test(title);
+            });
+            if (!usable.length) return null;
+
+            // Prefer a title with one or more of the specific product's meaningful words.
+            const productWords = String(item.name || '').toLowerCase()
+                .replace(/\\b(?:pcs?|g|oz)\\b/gi, '')
+                .split(/[^a-z0-9]+/).filter(word => word.length >= 4);
+            usable.sort((a, b) => {
+                const score = page => {
+                    const title = String(page.title || '').toLowerCase();
+                    return productWords.reduce((sum, word) => sum + (title.includes(word) ? 2 : 0), 0);
+                };
+                return score(b) - score(a);
+            });
+            return usable[0].imageinfo[0].thumburl || usable[0].imageinfo[0].url || null;
+        }
+
+        function runMenuPhotoQueue() {
+            while (menuPhotoLookupsActive < MENU_PHOTO_LOOKUPS_MAX && menuPhotoQueue.length) {
+                const task = menuPhotoQueue.shift();
+                menuPhotoLookupsActive++;
+                Promise.resolve().then(task).finally(() => {
+                    menuPhotoLookupsActive--;
+                    runMenuPhotoQueue();
+                });
+            }
+        }
+
+        function resolveProductPhoto(img, itemId) {
+            if (!img) return;
+            // A successful image load clears the styled placeholder immediately.
+            if (img.parentElement && img.parentElement.classList.contains('photo-unavailable')) {
+                img.parentElement.classList.remove('photo-unavailable');
+                img.style.display = '';
+            }
+            if (img.dataset.photoLookupStarted === '1') return;
+            const item = menuData.find(candidate => String(candidate.id) === String(itemId));
+            if (!item) return;
+
+            // Keep known product matches when they load successfully. Search only for fallbacks
+            // or when a direct photo fails to load.
+            if (MENU_PHOTO_OVERRIDES[String(item.id)] && img.dataset.photoError !== '1') return;
+
+            img.dataset.photoLookupStarted = '1';
+            const cacheKey = `${item.category}|${item.name}`.toLowerCase();
+            if (!menuPhotoLookupCache.has(cacheKey)) {
+                menuPhotoLookupCache.set(cacheKey, { promise: null });
+            }
+            const lookupEntry = menuPhotoLookupCache.get(cacheKey);
+            menuPhotoQueue.push(async () => {
+                const url = lookupEntry.promise
+                    ? await lookupEntry.promise
+                    : await (lookupEntry.promise = fetchCommonsMenuPhoto(item).catch(() => null));
+                if (url && img.isConnected) {
+                    img.dataset.photoFromCommons = '1';
+                    img.src = url;
+                } else if (img.isConnected && img.dataset.photoError === '1') {
+                    img.dataset.photoFallbackUsed = '1';
+                    img.src = menuPhotoPoolFallback(item, img.src);
+                }
+            });
+            runMenuPhotoQueue();
+        }
+
+        function handleProductPhotoError(img, itemId) {
+            if (!img) return;
+            // Hide broken-image alt text while the item-specific backup lookup runs.
+            if (img.parentElement) img.parentElement.classList.add('photo-unavailable');
+            img.style.display = 'none';
+            if (img.dataset.photoFromCommons === '1') {
+                img.dataset.photoFromCommons = '0';
+                img.dataset.photoFallbackUsed = '1';
+                const item = menuData.find(candidate => String(candidate.id) === String(itemId));
+                const fallback = menuPhotoPoolFallback(item, img.src);
+                img.dataset.photoFallbackUsed = '1';
+                if (img.src !== fallback) {
+                    img.src = fallback;
+                } else {
+                    img.style.display = 'none';
+                    img.parentElement && img.parentElement.classList.add('photo-unavailable');
+                }
+                return;
+            }
+            if (img.dataset.photoFallbackUsed === '1') {
+                img.style.display = 'none';
+                img.parentElement && img.parentElement.classList.add('photo-unavailable');
+                return;
+            }
+            img.dataset.photoError = '1';
+            img.dataset.photoLookupStarted = '0';
+            resolveProductPhoto(img, itemId);
+        }
+
+        function renderTopPicks() {
+            const picks = [menuData[0], menuData[3], menuData[2]];
+            document.getElementById('top-picks-container').innerHTML = picks.map(item => `
+                <article class="pick-card ${item.available === false ? 'is-sold-out' : ''}">
+                    <div class="pick-image"><img src="${menuIllustration(item)}" alt="${item.name} menu photo" loading="lazy" data-menu-photo="${item.id}" onload="resolveProductPhoto(this, ${item.id})" onerror="handleProductPhotoError(this, ${item.id})"><span>${item.available === false ? 'SOLD OUT' : item.tag}</span></div>
+                    <div class="pick-content"><div><h3>${item.name}</h3><p>${item.description}</p></div><strong>₱${item.price}</strong></div>
+                    <button class="pick-add" onclick="addToCart(${item.id})" aria-label="Add ${item.name}" ${item.available === false ? 'disabled' : ''}>${item.available === false ? '×' : '<i class="fa-solid fa-plus"></i>'}</button>
+                </article>
+            `).join('');
+        }
+
+        function renderMenu(items) {
+            const grid = document.getElementById('menu-grid');
+            const noResults = document.getElementById('no-results');
+            const query = document.getElementById('menu-search').value.trim().toLowerCase();
+            const filtered = items.filter(i => activeCategory === 'All' || i.category === activeCategory);
+            document.getElementById('result-count').textContent = `${filtered.length} item${filtered.length !== 1 ? 's' : ''}`;
+            if (!filtered.length) { grid.innerHTML = ''; noResults.classList.remove('hidden'); return; }
+            noResults.classList.add('hidden');
+            grid.innerHTML = filtered.map(item => `
+                <article class="desktop-card ${item.available === false ? 'is-sold-out' : ''}">
+                    <div class="card-image-wrap"><img src="${menuIllustration(item)}" alt="${item.name} menu photo" loading="lazy" data-menu-photo="${item.id}" onload="resolveProductPhoto(this, ${item.id})" onerror="handleProductPhotoError(this, ${item.id})"><span class="card-tag">${item.available === false ? 'SOLD OUT' : item.tag}</span></div>
+                    <div class="card-info"><div><span class="card-category">${item.category}</span><h3>${item.name}</h3><p>${item.size}</p></div><div class="card-bottom"><strong>₱${item.price}</strong><button class="add-cart-btn" onclick="event.stopPropagation(); addToCart(${item.id})" aria-label="Add ${item.name}" ${item.available === false ? 'disabled title="Sold out"' : ''}><i class="fa-solid fa-plus"></i></button></div></div>
+                </article>
+            `).join('');
+            document.getElementById('clear-search').classList.toggle('visible', !!query);
+        }
+
+        function filterSearch() {
+            const query = document.getElementById('menu-search').value.trim().toLowerCase();
+            const searched = menuData.filter(i => `${i.name} ${i.category} ${i.description}`.toLowerCase().includes(query));
+            updateFeaturedSectionVisibility();
+            renderMenu(searched);
+        }
+
+        function clearSearch() {
+            document.getElementById('menu-search').value = '';
+            activeCategory = 'All';
+            document.querySelectorAll('.category-chip').forEach(chip => chip.classList.toggle('active', chip.dataset.category === 'All'));
+            updateFeaturedSectionVisibility();
+            renderMenu(menuData);
+        }
+
+        function updateFeaturedSectionVisibility() {
+            const query = document.getElementById('menu-search').value.trim();
+            const hasActiveFilter = activeCategory !== 'All' || query.length > 0;
+            document.querySelector('.top-section').classList.toggle('hidden', hasActiveFilter);
+        }
+
+        function setCategory(category, button) {
+            activeCategory = category;
+            document.querySelectorAll('.category-chip').forEach(c => c.classList.remove('active'));
+            button.classList.add('active');
+            filterSearch();
+
+            if (category !== 'All' && window.matchMedia('(max-width: 650px)').matches) {
+                const menuSection = document.getElementById('menu-grid').closest('.menu-section');
+                const behavior = window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth';
+                menuSection.scrollIntoView({ behavior, block: 'start' });
+            }
+        }
+
+        function addToCart(id) {
+            syncMenuAvailability();
+            const item = menuData.find(i => String(i.id) === String(id));
+            if (!item) { showToast('This menu item could not be found.'); return; }
+            if (item.available === false) {
+                renderTopPicks();
+                filterSearch();
+                showToast(`${item.name} is sold out right now.`);
+                return;
+            }
+            const existing = cart.find(i => String(i.id) === String(id));
+            if (existing) existing.qty++;
+            else cart.push({...item, qty: 1});
+            updateBadge(); showToast(`${item.name} added to your order`);
+        }
+
+        function changeQty(id, delta) {
+            const item = cart.find(i => i.id === id); if (!item) return;
+            item.qty += delta; if (item.qty <= 0) cart = cart.filter(i => i.id !== id);
+            updateBadge(); openCart();
+        }
+
+        function updateBadge() {
+            const total = cart.reduce((sum, i) => sum + i.qty, 0);
+            const badge = document.getElementById('cart-badge'); badge.innerText = total; badge.style.display = total ? 'block' : 'none';
+        }
+
+        function showToast(msg) {
+            const t = document.getElementById('toast'); t.querySelector('span').innerText = msg; t.classList.add('show'); clearTimeout(window.toastTimer); window.toastTimer = setTimeout(() => t.classList.remove('show'), 2200);
+        }
+
+        function openCart() {
+            const list = document.getElementById('drawer-items-list'); let total = 0;
+            if (!cart.length) list.innerHTML = `<div class="cart-empty"><div><i class="fa-solid fa-bag-shopping"></i></div><h4>Your cart is empty</h4><p>Add something delicious from the menu.</p></div>`;
+            else list.innerHTML = cart.map(i => { total += i.price * i.qty; return `<div class="cart-row"><img src="${i.image}" alt=""><div class="cart-row-main"><strong>${i.name}</strong><small>₱${i.price} each</small><div class="qty-control"><button onclick="changeQty(${i.id},-1)"><i class="fa-solid fa-minus"></i></button><span>${i.qty}</span><button onclick="changeQty(${i.id},1)"><i class="fa-solid fa-plus"></i></button></div></div><b>₱${i.price * i.qty}</b></div>`; }).join('');
+            document.getElementById('drawer-total-price').innerText = `₱${total}.00`; document.getElementById('cart-modal').classList.add('open');
+        }
+
+        function closeCart() { document.getElementById('cart-modal').classList.remove('open'); }
+        function openMenuGuide() {
+            document.getElementById('guide-choice-screen').classList.remove('hidden');
+            document.getElementById('guide-recommend-screen').classList.add('hidden');
+            document.getElementById('guide-modal').classList.add('open');
+        }
+        function startMenuGuideFromWelcome() {
+            document.getElementById('qr-welcome-screen').style.display = 'none';
+            document.getElementById('guide-choice-screen').classList.add('hidden');
+            document.getElementById('guide-recommend-screen').classList.remove('hidden');
+            document.getElementById('guide-modal').classList.add('open');
+        }
+        function browseFromWelcome() {
+            document.getElementById('qr-welcome-screen').style.display = 'none';
+            document.querySelector('.main-container').scrollIntoView({behavior:'smooth', block:'start'});
+        }
+        function chooseMenuGuidePath(path) {
+            if (path === 'browse') {
+                closeMenuGuide();
+                document.querySelector('.menu-section').scrollIntoView({ behavior: 'smooth' });
+                return;
+            }
+            document.getElementById('guide-choice-screen').classList.add('hidden');
+            document.getElementById('guide-recommend-screen').classList.remove('hidden');
+        }
+        function backToMenuGuideChoice() {
+            document.getElementById('guide-recommend-screen').classList.add('hidden');
+            document.getElementById('guide-choice-screen').classList.remove('hidden');
+        }
+        function closeMenuGuide() {
+            document.getElementById('guide-modal').classList.remove('open');
+        }
+
+        function setMenuPreference(text) {
+            switchRecommendationInput('text', document.querySelector('.guide-tab'));
+            document.getElementById('guide-mood-desc').value = text;
+        }
+
+        function switchRecommendationInput(mode, button) {
+            recommendationInputMode = mode;
+            document.querySelectorAll('.guide-tab').forEach(tab => tab.classList.remove('active'));
+            button.classList.add('active');
+            document.querySelectorAll('.guide-panel').forEach(panel => panel.classList.add('hidden'));
+            document.getElementById(`guide-${mode}-panel`).classList.remove('hidden');
+        }
+
+        function startVoiceInput() {
+            const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+            const status = document.getElementById('voice-status');
+            const button = document.getElementById('voice-button');
+
+            if (!SpeechRecognition) {
+                status.textContent = 'Voice input is not supported in this browser.';
+                return;
+            }
+
+            const recognition = new SpeechRecognition();
+            recognition.lang = 'en-US';
+            recognition.interimResults = false;
+            status.textContent = 'Listening…';
+            button.classList.add('recording');
+
+            recognition.onresult = event => {
+                document.getElementById('guide-mood-desc').value = event.results[0][0].transcript;
+                switchRecommendationInput('text', document.querySelector('.guide-tab'));
+            };
+            recognition.onerror = () => {
+                status.textContent = 'Voice input could not be captured. Please try again.';
+            };
+            recognition.onend = () => button.classList.remove('recording');
+            recognition.start();
+        }
+
+        function previewReferencePhoto(event) {
+            const file = event.target.files[0];
+            if (!file || !file.type.startsWith('image/')) return;
+
+            const reader = new FileReader();
+            reader.onload = event => {
+                const preview = document.getElementById('image-preview');
+                preview.innerHTML = `<img src="${event.target.result}" alt="Selected reference image">`;
+                preview.classList.remove('hidden');
+            };
+            reader.readAsDataURL(file);
+        }
+
+        function renderMenuRecommendations() {
+            syncMenuAvailability();
+            const input = document.getElementById('guide-mood-desc').value.trim().toLowerCase();
+            const box = document.getElementById('guide-suggestion-result');
+            const availableItems = menuData.filter(item => item.available !== false);
+
+            if (!availableItems.length) {
+                box.classList.remove('hidden');
+                box.innerHTML = '<div class="result-label">NO AVAILABLE MATCHES</div><p class="guide-empty-note">Sorry, there are no available menu items right now. Please check again later.</p>';
+                return;
+            }
+
+            if (!input) {
+                box.classList.remove('hidden');
+                const prompt = recommendationInputMode === 'image'
+                    ? 'Photo upload is only a visual reference. Add a short description in the Text tab to get relevant suggestions.'
+                    : 'Describe a flavor, food or drink type, mood, or budget; for example, “something fruity under ₱150.”';
+                box.innerHTML = '<div class="result-label">ADD A PREFERENCE</div><p class="guide-empty-note">' + prompt + '</p>';
+                return;
+            }
+
+            const words = input.split(/[^a-z0-9₱]+/).filter(Boolean);
+            const budgetMatch = input.match(/(?:under|below|less than|budget(?: is| of)?|within|₱|p\s*)(\d{2,4})/i);
+            const budget = budgetMatch ? Number(budgetMatch[1]) : null;
+            const foodIntent = /\b(food|snack|meal|hungry|eat|eating|burger|sandwich|fries|cake|pastry|rice|pasta|dessert|savory|filling)\b/.test(input);
+            const drinkIntent = /\b(drink|drinks|beverage|thirsty|drinkable|coffee|tea|latte|milktea|milk tea|matcha|chai|refreshing|iced|cold|hot)\b/.test(input);
+            const availableFoodItems = availableItems.filter(item => item.isFood === true || /food|snack|meal|burger|sandwich|fries|pastry|cake|bread|rice|pasta|dessert/.test(`${item.category || ''} ${item.name || ''}`.toLowerCase()));
+            if (foodIntent && !availableFoodItems.length && !drinkIntent) {
+                box.classList.remove('hidden');
+                box.innerHTML = '<div class="result-label">NO FOOD ITEMS IN THE CURRENT MENU</div><p class="guide-empty-note">The current customer menu only has drink items loaded. Add food or snack products in the Staff Products page first; they will become eligible for recommendations after they are saved and available.</p>';
+                return;
+            }
+
+            // The guide ranks available items locally by preference words, menu text, and budget.
+            const preferenceGroups = [
+                { terms: ['sweet', 'sugar', 'dessert'], keys: ['sweet', 'blueberry', 'milk tea', 'cake', 'pastry', 'dessert'], weight: 3 },
+                { terms: ['fruity', 'fruit', 'berry', 'blueberry'], keys: ['fruit', 'blueberry', 'berry'], weight: 5 },
+                { terms: ['coffee', 'caffeine', 'awake', 'energy', 'energetic', 'strong'], keys: ['coffee', 'americano', 'espresso'], weight: 6 },
+                { terms: ['matcha', 'green tea'], keys: ['matcha', 'green tea'], weight: 7 },
+                { terms: ['chai', 'spiced', 'spice', 'cozy', 'warm', 'comforting'], keys: ['chai', 'spice', 'warm'], weight: 6 },
+                { terms: ['creamy', 'cream', 'milky', 'milk'], keys: ['cream', 'milk', 'latte', 'milktea', 'milk tea'], weight: 3 },
+                { terms: ['refreshing', 'refresh', 'cold', 'iced', 'light'], keys: ['iced', 'refresh', 'cold', 'light'], weight: 3 },
+                { terms: ['not too sweet', 'less sweet', 'unsweetened', 'low sugar'], keys: ['less sweet', 'unsweetened', 'low sugar'], weight: 2 },
+                { terms: ['savory', 'salty', 'crispy', 'filling', 'hungry'], keys: ['savory', 'salty', 'crispy', 'filling', 'meal', 'food', 'snack'], weight: 5 }
+            ];
+
+            const ranked = availableItems.map(item => {
+                const name = String(item.name || '').toLowerCase();
+                const category = String(item.category || '').toLowerCase();
+                const description = String(item.description || '').toLowerCase();
+                const searchable = `${name} ${category} ${description}`;
+                const itemIsFood = item.isFood === true || /food|snack|meal|burger|sandwich|fries|pastry|cake|bread|rice|pasta|dessert/.test(`${category} ${name}`);
+                let score = 0;
+                let reasons = [];
+
+                if (foodIntent && itemIsFood) { score += 8; reasons.push('matches your food/snack request'); }
+                if (drinkIntent && !itemIsFood) { score += 5; reasons.push('matches your drink request'); }
+
+                preferenceGroups.forEach(group => {
+                    const asked = group.terms.some(term => input.includes(term));
+                    if (asked && group.keys.some(key => searchable.includes(key))) {
+                        score += group.weight;
+                        reasons.push(`fits your ${group.terms.find(term => input.includes(term))} preference`);
+                    }
+                });
+
+                // Reward direct mentions of an item or category.
+                words.forEach(word => {
+                    if (word.length > 2 && (name.includes(word) || category.includes(word))) score += 4;
+                });
+
+                if (budget !== null) {
+                    if (Number(item.price) <= budget) { score += 4; reasons.push(`within your ₱${budget} budget`); }
+                    else score -= 8;
+                }
+                if (/cheap|affordable|budget-friendly|budget friendly/.test(input)) score += Number(item.price) <= 130 ? 2 : -1;
+
+                // Small neutral baseline; menu order is not used as the main matching signal.
+                return { item, score, reasons };
+            }).sort((a, b) => b.score - a.score || Number(a.item.price) - Number(b.item.price));
+
+            let matches = ranked.filter(entry => entry.score > 0).slice(0, 3);
+            if (!matches.length) matches = ranked.slice(0, Math.min(3, ranked.length));
+
+            const reasonFor = entry => {
+                if (entry.reasons.length) return `Good match: ${entry.reasons.slice(0, 2).join(' and ')}.`;
+                return 'A menu option to consider. Add a flavor, food type, or budget to get a closer match.';
+            };
+
+            box.classList.remove('hidden');
+            box.innerHTML = `<div class="result-label"><i class="fa-solid fa-sparkles"></i> SUGGESTED MENU MATCHES</div>
+                <p class="guide-results-note">Ranked from available menu items based on the words and preferences you entered.</p>
+                <div class="guide-result-list">${matches.map((entry, index) => {
+                    const item = entry.item;
+                    const imageMarkup = `<img src="${menuIllustration(item)}" alt="${item.name} menu photo" loading="lazy" data-menu-photo="${item.id}" onload="resolveProductPhoto(this, ${item.id})" onerror="handleProductPhotoError(this, ${item.id})">`;
+                    return `<article class="guide-result-content">
+                        ${imageMarkup}
+                        <div class="guide-result-copy"><strong>${item.name}</strong><p>${reasonFor(entry)}</p><span>${item.category || 'Menu item'} · ₱${Number(item.price).toLocaleString('en-PH')}</span></div>
+                        <button onclick="addToCart(${JSON.stringify(item.id)})">Add <i class="fa-solid fa-plus"></i></button>
+                    </article>`;
+                }).join('')}</div>`;
+        }
+
+        function proceedToCheckout() {
+            syncMenuAvailability();
+            if (!cart.length) {
+                showToast('Add an item before confirming your order');
+                return;
+            }
+
+            const unavailableItems = cart.filter(cartItem => {
+                const currentItem = menuData.find(item => String(item.id) === String(cartItem.id));
+                return !currentItem || currentItem.available === false;
+            });
+            if (unavailableItems.length) {
+                cart = cart.filter(cartItem => !unavailableItems.some(item => String(item.id) === String(cartItem.id)));
+                updateBadge();
+                openCart();
+                showToast('A sold-out item was removed. Please review your order.');
+                renderTopPicks();
+                filterSearch();
+                return;
+            }
+
+            const order = createOrder();
+            const orders = getOrders();
+            orders.unshift(order);
+            saveOrders(orders);
+            broadcastOrderChange();
+
+            cart = [];
+            updateBadge();
+            closeCart();
+
+            showToast(`Order ${order.id} sent to POP BOX staff`);
+            showCustomerReceipt(order);
+        }
+
+        function formatPeso(amount) {
+            return `₱${Number(amount || 0).toLocaleString('en-PH', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+        }
+
+        let activeCustomerReceiptOrderId = null;
+
+        function showCustomerReceipt(order) {
+            activeCustomerReceiptOrderId = order.id;
+            document.getElementById('receipt-order-meta').innerHTML = `<span><b>Order No.</b> ${order.id}</span><span><b>Table</b> ${order.table}</span><span><b>Date</b> ${new Date(order.createdAt).toLocaleString('en-PH')}</span>`;
+            document.getElementById('receipt-items').innerHTML = order.items.map(item => `
+                <div class="receipt-line"><div><strong>${item.name}</strong><small>${item.qty} × ${formatPeso(item.price)}</small></div><b>${formatPeso(item.qty * item.price)}</b></div>
+            `).join('');
+            document.getElementById('receipt-total').textContent = formatPeso(order.total);
+            updateCustomerReceiptStatus(order);
+            document.getElementById('receipt-modal').classList.add('open');
+        }
+
+        function updateCustomerReceiptStatus(order) {
+            const orderStatus = order.status || 'pending';
+            const paymentStatus = order.paymentStatus || (orderStatus === 'paid' ? 'paid' : 'pending');
+            const orderLabels = { pending: 'Pending — waiting for staff', preparing: 'Preparing your order', ready: 'Ready for pickup', paid: 'Completed' };
+            const paymentLabel = paymentStatus === 'paid' ? 'Paid' : 'Pending — please pay the cashier';
+            const statusEl = document.getElementById('receipt-status');
+            statusEl.innerHTML = `<strong>Order status:</strong> ${orderLabels[orderStatus] || orderStatus} <br><strong>Payment:</strong> ${paymentLabel}`;
+            statusEl.style.color = orderStatus === 'ready' ? '#24804b' : (paymentStatus === 'paid' ? '#24804b' : '#a35b31');
+        }
+
+        function refreshCustomerReceiptStatus() {
+            if (!activeCustomerReceiptOrderId) return;
+            const order = getOrders().find(item => item.id === activeCustomerReceiptOrderId);
+            if (order) updateCustomerReceiptStatus(order);
+        }
+
+        function closeReceipt() {
+            document.getElementById('receipt-modal').classList.remove('open');
+        }
+
+        window.addEventListener('storage', event => {
+            if (event.key === POPBOX_ORDERS_KEY) refreshCustomerReceiptStatus();
+            if (event.key === POPBOX_PRODUCTS_KEY) {
+                syncMenuAvailability();
+                renderTopPicks();
+                filterSearch();
+                // Refresh the open cart so its contents reflect current availability.
+                if (document.getElementById('cart-modal').classList.contains('open')) openCart();
+            }
+        });
+
+        document.addEventListener('keydown', e => { if (e.key === 'Escape') { closeCart(); closeMenuGuide(); } });
+        ['cart-modal','guide-modal','receipt-modal'].forEach(id => document.getElementById(id).addEventListener('click', e => { if (e.target.id === id) e.currentTarget.classList.remove('open'); }));
+    </script>
+</body>
+</html>
