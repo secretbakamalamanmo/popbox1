@@ -1,0 +1,90 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#2b211b">
+  <title>POP BOX Cafe — Demo</title>
+  <style>
+    :root {
+      color-scheme: light;
+      --ink: #2b211b;
+      --muted: #786d65;
+      --coffee: #4a2e1d;
+      --caramel: #b8743e;
+      --paper: #fffdf9;
+      --line: #e8ded3;
+    }
+    * { box-sizing: border-box; }
+    body {
+      min-height: 100vh;
+      margin: 0;
+      padding: 28px 16px;
+      display: grid;
+      place-items: center;
+      background: radial-gradient(circle at 90% 8%, #f0ddc7 0, transparent 34%), #f7f2eb;
+      color: var(--ink);
+      font: 16px/1.5 system-ui, -apple-system, "Segoe UI", sans-serif;
+    }
+    main {
+      width: min(100%, 760px);
+      padding: clamp(26px, 6vw, 54px);
+      border: 1px solid var(--line);
+      border-radius: 28px;
+      background: var(--paper);
+      box-shadow: 0 22px 70px #3b28131a;
+    }
+    .brand { margin: 0 0 12px; color: var(--caramel); font-size: 13px; font-weight: 800; letter-spacing: .16em; }
+    h1 { max-width: 520px; margin: 0; font-size: clamp(34px, 7vw, 54px); line-height: 1.06; letter-spacing: -.04em; }
+    .intro { max-width: 520px; margin: 18px 0 30px; color: var(--muted); }
+    .links { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 14px; }
+    a {
+      min-height: 150px;
+      padding: 22px;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      gap: 18px;
+      border: 1px solid var(--line);
+      border-radius: 20px;
+      color: var(--ink);
+      text-decoration: none;
+      transition: transform .16s ease, border-color .16s ease, box-shadow .16s ease;
+    }
+    a:hover, a:focus-visible { transform: translateY(-2px); border-color: var(--caramel); box-shadow: 0 12px 24px #3b281312; outline: none; }
+    a.primary { background: var(--coffee); color: white; border-color: var(--coffee); }
+    a strong { font-size: 20px; }
+    a span { color: var(--muted); font-size: 14px; }
+    a.primary span { color: #eaded3; }
+    .arrow { align-self: flex-end; color: var(--caramel); font-size: 24px; line-height: 1; }
+    a.primary .arrow { color: #f1c69e; }
+    .note { margin: 22px 0 0; color: var(--muted); font-size: 12px; }
+    @media (max-width: 560px) {
+      body { padding: 14px; }
+      main { border-radius: 22px; }
+      .links { grid-template-columns: 1fr; }
+      a { min-height: 126px; }
+    }
+  </style>
+</head>
+<body>
+  <main>
+    <p class="brand">POP BOX CAFE</p>
+    <h1>Choose a demo page</h1>
+    <p class="intro">Open the customer menu or staff dashboard to explore the ordering prototype.</p>
+    <nav class="links" aria-label="Demo pages">
+      <a class="primary" href="customer/">
+        <strong>Customer menu</strong>
+        <span>Browse the menu and try placing an order.</span>
+        <b class="arrow" aria-hidden="true">↗</b>
+      </a>
+      <a href="staff/">
+        <strong>Staff dashboard</strong>
+        <span>View the staff tools and demo order list.</span>
+        <b class="arrow" aria-hidden="true">↗</b>
+      </a>
+    </nav>
+    <p class="note">Demo only. Orders are saved in this browser and do not sync between devices.</p>
+  </main>
+</body>
+</html>
